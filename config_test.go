@@ -1,0 +1,270 @@
+package grdep_test
+
+import (
+	"testing"
+
+	"github.com/berquerant/grdep"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestConfig(t *testing.T) {
+	t.Run("unmarshal", func(t *testing.T) {
+		for _, tc := range []struct {
+			name string
+			text string
+			want *grdep.Config
+		}{
+			{
+				name: "yaml",
+				text: `---
+ignore:
+  - "\\.git"
+category:
+  - filename:
+      regex: "\\.sh$"
+      value:
+        - "bash"
+  - filename:
+      regex: "\\.(?P<ext>\\w+)$"
+      template: "$ext"
+  - name: shebang
+    text:
+      regex: "#!/bin/bash"
+      value:
+        - "bash"
+node:
+  - name: create bash node
+    category: "bash"
+    selector:
+      regex: "^\\. (?P<v>\\w+)$"
+      template: "$v"
+normalizer:
+  category:
+    - name: sh to bash
+      matcher:
+        regex: "^sh$"
+        value:
+          - "bash"`,
+				want: &grdep.Config{
+					Ignores: []grdep.Regexp{
+						grdep.NewRegexp(`\.git`),
+					},
+					Categories: []grdep.CSelector{
+						{
+							Filename: &grdep.Matcher{
+								Regex: grdep.NewRegexp(`\.sh$`),
+								Value: []string{"bash"},
+							},
+						},
+						{
+							Filename: &grdep.Matcher{
+								Regex:    grdep.NewRegexp(`\.(?P<ext>\w+)$`),
+								Template: `$ext`,
+							},
+						},
+						{
+							Name: "shebang",
+							Text: &grdep.Matcher{
+								Regex: grdep.NewRegexp(`#!/bin/bash`),
+								Value: []string{"bash"},
+							},
+						},
+					},
+					Nodes: []grdep.NSelector{
+						{
+							Name:     "create bash node",
+							Category: grdep.NewRegexp(`bash`),
+							Selector: &grdep.Matcher{
+								Regex:    grdep.NewRegexp(`^\. (?P<v>\w+)$`),
+								Template: `$v`,
+							},
+						},
+					},
+					Normalizers: grdep.Normalizers{
+						Categories: []grdep.NamedMatcher{
+							{
+								Name: "sh to bash",
+								Matcher: &grdep.Matcher{
+									Regex: grdep.NewRegexp(`^sh$`),
+									Value: []string{"bash"},
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+				name: "json",
+				text: `{"category":[{"filename":{"regex":"\\.sh$","value":["bash"]}},{"filename":{"regex":"\\.(?P\u003cext\u003e\\w+)$","template":"$ext"}},{"name":"shebang","text":{"regex":"#!/bin/bash","value":["bash"]}}],"ignore":["\\.git"],"node":[{"category":"bash","name":"create bash node","selector":{"regex":"^\\. (?P\u003cv\u003e\\w+)$","template":"$v"}}],"normalizer":{"category":[{"matcher":{"regex":"^sh$","value":["bash"]},"name":"sh to bash"}]}}`,
+				want: &grdep.Config{
+					Ignores: []grdep.Regexp{
+						grdep.NewRegexp(`\.git`),
+					},
+					Categories: []grdep.CSelector{
+						{
+							Filename: &grdep.Matcher{
+								Regex: grdep.NewRegexp(`\.sh$`),
+								Value: []string{"bash"},
+							},
+						},
+						{
+							Filename: &grdep.Matcher{
+								Regex:    grdep.NewRegexp(`\.(?P<ext>\w+)$`),
+								Template: `$ext`,
+							},
+						},
+						{
+							Name: "shebang",
+							Text: &grdep.Matcher{
+								Regex: grdep.NewRegexp(`#!/bin/bash`),
+								Value: []string{"bash"},
+							},
+						},
+					},
+					Nodes: []grdep.NSelector{
+						{
+							Name:     "create bash node",
+							Category: grdep.NewRegexp(`bash`),
+							Selector: &grdep.Matcher{
+								Regex:    grdep.NewRegexp(`^\. (?P<v>\w+)$`),
+								Template: `$v`,
+							},
+						},
+					},
+					Normalizers: grdep.Normalizers{
+						Categories: []grdep.NamedMatcher{
+							{
+								Name: "sh to bash",
+								Matcher: &grdep.Matcher{
+									Regex: grdep.NewRegexp(`^sh$`),
+									Value: []string{"bash"},
+								},
+							},
+						},
+					},
+				},
+			},
+		} {
+			t.Run(tc.name, func(t *testing.T) {
+				got, err := grdep.ParseConfig(tc.text)
+				if !assert.Nil(t, err) {
+					t.Error(err.Error())
+				}
+				assert.Equal(t, tc.want, got)
+			})
+		}
+	})
+
+	t.Run("add", func(t *testing.T) {
+		var (
+			zero grdep.Config
+			r1   = grdep.NewRegexp(`r1`)
+			r2   = grdep.NewRegexp(`r2`)
+			c1   = grdep.CSelector{
+				Name: "c1",
+			}
+			c2 = grdep.CSelector{
+				Name: "c2",
+			}
+			n1 = grdep.NSelector{
+				Name: "n1",
+			}
+			n2 = grdep.NSelector{
+				Name: "n2",
+			}
+			nc1 = grdep.NamedMatcher{
+				Name: "nc1",
+			}
+			nc2 = grdep.NamedMatcher{
+				Name: "nc2",
+			}
+			nn1 = grdep.NamedMatcher{
+				Name: "nn1",
+			}
+			nn2 = grdep.NamedMatcher{
+				Name: "nn2",
+			}
+			nr1 = grdep.Normalizers{
+				Categories: []grdep.NamedMatcher{nc1},
+				Nodes:      []grdep.NamedMatcher{nn1},
+			}
+			nr2 = grdep.Normalizers{
+				Categories: []grdep.NamedMatcher{nc2},
+				Nodes:      []grdep.NamedMatcher{nn2},
+			}
+		)
+
+		for _, tc := range []struct {
+			name  string
+			left  grdep.Config
+			right grdep.Config
+			want  grdep.Config
+		}{
+			{
+				name: "zero",
+				want: zero,
+			},
+			{
+				name: "right zero",
+				left: grdep.Config{
+					Ignores:     []grdep.Regexp{r1},
+					Categories:  []grdep.CSelector{c1},
+					Nodes:       []grdep.NSelector{n1},
+					Normalizers: nr1,
+				},
+				right: zero,
+				want: grdep.Config{
+					Ignores:     []grdep.Regexp{r1},
+					Categories:  []grdep.CSelector{c1},
+					Nodes:       []grdep.NSelector{n1},
+					Normalizers: nr1,
+				},
+			},
+			{
+				name: "left zero",
+				left: zero,
+				right: grdep.Config{
+					Ignores:     []grdep.Regexp{r1},
+					Categories:  []grdep.CSelector{c1},
+					Nodes:       []grdep.NSelector{n1},
+					Normalizers: nr1,
+				},
+				want: grdep.Config{
+					Ignores:     []grdep.Regexp{r1},
+					Categories:  []grdep.CSelector{c1},
+					Nodes:       []grdep.NSelector{n1},
+					Normalizers: nr1,
+				},
+			},
+			{
+				name: "add",
+				left: grdep.Config{
+					Ignores:     []grdep.Regexp{r1},
+					Categories:  []grdep.CSelector{c1},
+					Nodes:       []grdep.NSelector{n1},
+					Normalizers: nr1,
+				},
+				right: grdep.Config{
+					Ignores:     []grdep.Regexp{r2},
+					Categories:  []grdep.CSelector{c2},
+					Nodes:       []grdep.NSelector{n2},
+					Normalizers: nr2,
+				},
+				want: grdep.Config{
+					Ignores:    []grdep.Regexp{r1, r2},
+					Categories: []grdep.CSelector{c1, c2},
+					Nodes:      []grdep.NSelector{n1, n2},
+					Normalizers: grdep.Normalizers{
+						Categories: []grdep.NamedMatcher{nc1, nc2},
+						Nodes:      []grdep.NamedMatcher{nn1, nn2},
+					},
+				},
+			},
+		} {
+			t.Run(tc.name, func(t *testing.T) {
+				got := tc.left.Add(tc.right)
+				assert.Equal(t, tc.want, got)
+			})
+		}
+	})
+}
