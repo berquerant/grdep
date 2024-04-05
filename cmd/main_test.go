@@ -14,7 +14,9 @@ import (
 )
 
 func TestEndToEnd(t *testing.T) {
-	based := t.TempDir()
+	based, err := os.MkdirTemp("", "e2e")
+	fail(t, err)
+	defer os.RemoveAll(based)
 	bin := filepath.Join(based, "grdep")
 	fail(t, compileBinary(bin))
 	skeleton := filepath.Join(based, "skeleton.yml")
