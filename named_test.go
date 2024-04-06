@@ -126,7 +126,9 @@ func TestNamedNormalizers(t *testing.T) {
 				{
 					Name: "m1",
 					Matcher: &grdep.Matcher{
-						Regex: grdep.NewRegexp(`^sh$`),
+						Regex: []grdep.Regexp{
+							grdep.NewRegexp(`^sh$`),
+						},
 						Value: []string{"bash"},
 					},
 				},
@@ -145,7 +147,9 @@ func TestNamedNormalizers(t *testing.T) {
 				{
 					Name: "m1",
 					Matcher: &grdep.Matcher{
-						Regex: grdep.NewRegexp(`^sh$`),
+						Regex: []grdep.Regexp{
+							grdep.NewRegexp(`^sh$`),
+						},
 						Value: []string{"bash"},
 					},
 				},
@@ -165,14 +169,18 @@ func TestNamedNormalizers(t *testing.T) {
 				{
 					Name: "m1",
 					Matcher: &grdep.Matcher{
-						Regex: grdep.NewRegexp(`^sh$`),
+						Regex: []grdep.Regexp{
+							grdep.NewRegexp(`^sh$`),
+						},
 						Value: []string{"bash"},
 					},
 				},
 				{
 					Name: "m2",
 					Matcher: &grdep.Matcher{
-						Regex: grdep.NewRegexp(`^bash$`),
+						Regex: []grdep.Regexp{
+							grdep.NewRegexp(`^bash$`),
+						},
 						Value: []string{"zsh"},
 					},
 				},

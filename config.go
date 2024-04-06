@@ -135,12 +135,15 @@ var (
 )
 
 type Matcher struct {
-	Regex    Regexp   `yaml:"regex" json:"regex"`
+	Regex    []Regexp `yaml:"regex" json:"regex"`
 	Template string   `yaml:"template,omitempty" json:"template,omitempty"`
 	Value    []string `yaml:"value,omitempty" json:"value,omitempty"`
 }
 
 func (m Matcher) Validate() error {
+	if len(m.Regex) == 0 {
+		return fmt.Errorf("%w: no regex", ErrInvalidConfig)
+	}
 	return nil
 }
 

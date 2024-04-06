@@ -18,7 +18,9 @@ func TestMatcher(t *testing.T) {
 		{
 			name: "value matched",
 			matcher: &grdep.Matcher{
-				Regex: grdep.NewRegexp(`target`),
+				Regex: []grdep.Regexp{
+					grdep.NewRegexp(`target`),
+				},
 				Value: []string{"ret"},
 			},
 			src:  "target",
@@ -27,7 +29,9 @@ func TestMatcher(t *testing.T) {
 		{
 			name: "value unmatched",
 			matcher: &grdep.Matcher{
-				Regex: grdep.NewRegexp(`target`),
+				Regex: []grdep.Regexp{
+					grdep.NewRegexp(`target`),
+				},
 				Value: []string{"ret"},
 			},
 			src: "unmatched",
@@ -36,7 +40,9 @@ func TestMatcher(t *testing.T) {
 		{
 			name: "template matched",
 			matcher: &grdep.Matcher{
-				Regex:    grdep.NewRegexp(`/(?P<sh>[^/]+)$`),
+				Regex: []grdep.Regexp{
+					grdep.NewRegexp(`/(?P<sh>[^/]+)$`),
+				},
 				Template: "$sh",
 			},
 			src:  "#!/bin/bash",
@@ -45,7 +51,9 @@ func TestMatcher(t *testing.T) {
 		{
 			name: "template unmatched",
 			matcher: &grdep.Matcher{
-				Regex:    grdep.NewRegexp(`/(?P<sh>[^/]+)$`),
+				Regex: []grdep.Regexp{
+					grdep.NewRegexp(`/(?P<sh>[^/]+)$`),
+				},
 				Template: "$sh",
 			},
 			src: "func()",
@@ -54,13 +62,64 @@ func TestMatcher(t *testing.T) {
 		{
 			name: "match all",
 			matcher: &grdep.Matcher{
-				Regex: grdep.NewRegexp(`/bin/[^,]+`),
+				Regex: []grdep.Regexp{
+					grdep.NewRegexp(`/bin/[^,]+`),
+				},
 			},
 			src: "/bin/a,/bin/b",
 			want: []string{
 				"/bin/a",
 				"/bin/b",
 			},
+		},
+		{
+			name: "match all all",
+			matcher: &grdep.Matcher{
+				Regex: []grdep.Regexp{
+					grdep.NewRegexp(`bin`),
+					grdep.NewRegexp(`/bin/[^,]+`),
+				},
+			},
+			src: "/bin/a,/bin/b",
+			want: []string{
+				"/bin/a",
+				"/bin/b",
+			},
+		},
+		{
+			name: "unmatched at first",
+			matcher: &grdep.Matcher{
+				Regex: []grdep.Regexp{
+					grdep.NewRegexp(`^/sbin`),
+					grdep.NewRegexp(`/bin/[^,]+`),
+				},
+			},
+			src: "/bin/a,/bin/b",
+			err: grdep.ErrUnmatched,
+		},
+		{
+			name: "template matched all",
+			matcher: &grdep.Matcher{
+				Regex: []grdep.Regexp{
+					grdep.NewRegexp(`bash`),
+					grdep.NewRegexp(`/(?P<sh>[^/]+)$`),
+				},
+				Template: "$sh",
+			},
+			src:  "#!/bin/bash",
+			want: []string{"bash"},
+		},
+		{
+			name: "value matched all",
+			matcher: &grdep.Matcher{
+				Regex: []grdep.Regexp{
+					grdep.NewRegexp(`target`),
+					grdep.NewRegexp(`tar`),
+				},
+				Value: []string{"ret"},
+			},
+			src:  "target",
+			want: []string{"ret"},
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

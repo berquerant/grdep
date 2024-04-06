@@ -35,18 +35,21 @@ ignore:
 category:
   - name: if filename matches then the categories are bash and sh
     filename:
-      regex: "\\.sh$"
+      regex:
+        - "\\.sh$"
       value:
         - "bash"
         - "sh"
   - filename: # 'name' is optional
       # https://pkg.go.dev/regexp#Regexp.ExpandString
       # extract extension as category
-      regex: "\\.(?P<ext>\\w+)$"
+      regex:
+        - "\\.(?P<ext>\\w+)$"
       template: "$ext"
   - name: if file content matches then the category is bash
     text:
-      regex: "#!/bin/bash"
+      regex:
+        - "#!/bin/bash"
       value:
         - "bash"
 # Find dependencies.
@@ -54,23 +57,27 @@ node:
   - name: create bash node
     category: "bash"
     selector:
-      regex: "^\\. (?P<v>.+)$"
+      regex:
+        - "^\\. (?P<v>.+)$"
       template: "$v"
   - name: create bin node
     category: ".*"
     selector:
-      regex: "/usr/bin/\\w+"
+      regex:
+        - "/usr/bin/\\w+"
 # Normalize categories and nodes.
 # If there is no match, the value remains as is.
 normalizer:
   category:
     - name: sh to bash
       matcher:
-        regex: "^sh$"
+        regex:
+          - "^sh$"
         value:
           - bash
   node:
     - name: extract binary name
       matcher:
-        regex: "^/usr/bin/(?P<v>\\w+)$"
+        regex:
+          - "^/usr/bin/(?P<v>\\w+)$"
         template: "$v"`
