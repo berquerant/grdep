@@ -38,7 +38,7 @@ var runCmd = &cobra.Command{
 			logger:     logger,
 			isDebug:    isDebug,
 			categories: grdep.CachedFunc(categories.Select),
-			// Caching rows as keys is not very effective
+			// Caching lines as keys is not very effective
 			nodes:              nodes.Select,
 			categoryNormalizer: grdep.CachedFunc(categoryNormalizers.Normalize),
 			nodeNormalizer:     grdep.CachedFunc(nodeNormalizers.Normalize),

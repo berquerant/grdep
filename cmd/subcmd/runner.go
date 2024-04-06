@@ -57,9 +57,9 @@ func (r runner) processPath(ctx context.Context, arg PassArg) error {
 		return err
 	}
 
-	for row := range grdep.NewWalker(arg.Path.Text, r.config.Ignores).Walk(ctx) {
+	for line := range grdep.NewWalker(arg.Path.Text, r.config.Ignores).Walk(ctx) {
 		a := arg
-		a.Line = row
+		a.Line = line
 		if err := r.processLine(ctx, a); err != nil {
 			return err
 		}
@@ -69,7 +69,7 @@ func (r runner) processPath(ctx context.Context, arg PassArg) error {
 }
 
 func (r runner) processLine(ctx context.Context, arg PassArg) error {
-	r.debug(func() { r.logger.Debug("process row", "arg", jsonify(arg)) })
+	r.debug(func() { r.logger.Debug("process line", "arg", jsonify(arg)) })
 	if err := arg.Line.Err; err != nil {
 		return err
 	}

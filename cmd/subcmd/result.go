@@ -4,7 +4,7 @@ import "github.com/berquerant/grdep"
 
 type Result struct {
 	Path     grdep.ReadLinesResult `json:"path,omitempty"`
-	Line     grdep.Line            `json:"row,omitempty"`
+	Line     grdep.Line            `json:"line,omitempty"`
 	Category Selected              `json:"category,omitempty"`
 	Node     Selected              `json:"node,omitempty"`
 }
