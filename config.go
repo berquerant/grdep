@@ -239,7 +239,7 @@ func (r *Regexp) UnmarshalYAML(value *yaml.Node) error {
 
 	v, err := regexp.Compile(value.Value)
 	if err != nil {
-		return err
+		return fmt.Errorf("%w: value is %s", err, value.Value)
 	}
 	*r = Regexp(*v)
 	return nil
