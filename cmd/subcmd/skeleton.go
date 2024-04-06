@@ -72,5 +72,5 @@ normalizer:
   node:
     - name: extract binary name
       matcher:
-        regex: "^/usr/bin/(?<v>\\w+)$"
+        regex: "^/usr/bin/(?P<v>\\w+)$"
         template: "$v"`
