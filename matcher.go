@@ -15,6 +15,13 @@ var (
 	ErrUnmatched = errors.New("Unmatched")
 )
 
+func (m MatchExpr) Match(src string) bool {
+	if m.Not != nil {
+		return !m.Not.Unwrap().MatchString(src)
+	}
+	return m.Regex.Unwrap().MatchString(src)
+}
+
 func (m Matcher) Match(src string) (ret []string, err error) {
 	if err = m.matchHeads(src); err != nil {
 		return
@@ -38,21 +45,21 @@ func (m Matcher) Match(src string) (ret []string, err error) {
 	return
 }
 
-func (m Matcher) heads() []Regexp {
+func (m Matcher) heads() []MatchExpr {
 	return m.Regex[:len(m.Regex)-1]
 }
 
 func (m Matcher) matchHeads(src string) error {
 	for i, x := range m.heads() {
-		if !x.Unwrap().MatchString(src) {
+		if !x.Match(src) {
 			return fmt.Errorf("%w: heads matcher[%d]", ErrUnmatched, i)
 		}
 	}
 	return nil
 }
 
-func (m Matcher) tail() Regexp {
-	return m.Regex[len(m.Regex)-1]
+func (m Matcher) tail() *Regexp {
+	return m.Regex[len(m.Regex)-1].Regex
 }
 
 func (m Matcher) matchAll(src string) ([]string, error) {

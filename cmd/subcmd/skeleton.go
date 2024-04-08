@@ -30,13 +30,13 @@ const skeletonYAML = `---
 #
 # List of regular expressions for files and directories to ignore.
 ignore:
-  - "ignore"
+  - r: "ignore"
 # Determine file categories from filename or text.
 category:
   - name: if filename matches then the categories are bash and sh
     filename:
       regex:
-        - "\\.sh$"
+        - r: "\\.sh$"
       value:
         - "bash"
         - "sh"
@@ -44,12 +44,12 @@ category:
       # https://pkg.go.dev/regexp#Regexp.ExpandString
       # extract extension as category
       regex:
-        - "\\.(?P<ext>\\w+)$"
+        - r: "\\.(?P<ext>\\w+)$"
       template: "$ext"
   - name: if file content matches then the category is bash
     text:
       regex:
-        - "#!/bin/bash"
+        - r: "#!/bin/bash"
       value:
         - "bash"
 # Find dependencies.
@@ -58,13 +58,19 @@ node:
     category: "bash"
     selector:
       regex:
-        - "^\\. (?P<v>.+)$"
+        - r: "^\\. (?P<v>.+)$"
       template: "$v"
   - name: create bin node
     category: ".*"
     selector:
       regex:
-        - "/usr/bin/\\w+"
+        - r: "/usr/bin/\\w+"
+  - name: local/src but not /usr/local/src
+    category: "bash"
+    selector:
+      regex:
+        - not: "/usr/local/src"
+        - r: "local/src"
 # Normalize categories and nodes.
 # If there is no match, the value remains as is.
 normalizer:
@@ -72,12 +78,12 @@ normalizer:
     - name: sh to bash
       matcher:
         regex:
-          - "^sh$"
+          - r: "^sh$"
         value:
           - bash
   node:
     - name: extract binary name
       matcher:
         regex:
-          - "^/usr/bin/(?P<v>\\w+)$"
+          - r: "^/usr/bin/(?P<v>\\w+)$"
         template: "$v"`

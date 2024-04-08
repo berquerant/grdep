@@ -87,9 +87,23 @@ func (ConfigParser) parseJSON(b []byte) (*Config, error) {
 	return &c, nil
 }
 
+type Validatable interface {
+	Validate() error
+}
+
+var (
+	_ Validatable = &Config{}
+	_ Validatable = &MatchExpr{}
+	_ Validatable = &Matcher{}
+	_ Validatable = &NamedMatcher{}
+	_ Validatable = &CSelector{}
+	_ Validatable = &NSelector{}
+	_ Validatable = &Normalizers{}
+)
+
 type Config struct {
 	// Ignore files with matching paths.
-	Ignores []Regexp `yaml:"ignore,omitempty" json:"ignore,omitempty"`
+	Ignores []MatchExpr `yaml:"ignore,omitempty" json:"ignore,omitempty"`
 	// Select file category.
 	Categories []CSelector `yaml:"category" json:"category"`
 	// Find nodes corresponding to categories.
@@ -134,15 +148,38 @@ var (
 	ErrInvalidConfig = errors.New("InvalidConfig")
 )
 
+type MatchExpr struct {
+	Regex *Regexp `yaml:"r,omitempty" json:"r,omitempty"`
+	Not   *Regexp `yaml:"not,omitempty" json:"not,omitempty"`
+}
+
+func (m MatchExpr) Validate() error {
+	if !XOR(m.Regex == nil, m.Not == nil) {
+		return fmt.Errorf("%w: specify only either regex or not", ErrInvalidConfig)
+	}
+	return nil
+}
+
 type Matcher struct {
-	Regex    []Regexp `yaml:"regex" json:"regex"`
-	Template string   `yaml:"template,omitempty" json:"template,omitempty"`
-	Value    []string `yaml:"value,omitempty" json:"value,omitempty"`
+	Regex    []MatchExpr `yaml:"regex" json:"regex"`
+	Template string      `yaml:"template,omitempty" json:"template,omitempty"`
+	Value    []string    `yaml:"value,omitempty" json:"value,omitempty"`
 }
 
 func (m Matcher) Validate() error {
 	if len(m.Regex) == 0 {
 		return fmt.Errorf("%w: no regex", ErrInvalidConfig)
+	}
+	for i, x := range m.Regex {
+		if err := x.Validate(); err != nil {
+			return fmt.Errorf("%w: regex[%d]", err, i)
+		}
+	}
+	if m.Template != "" && len(m.Value) > 0 {
+		return fmt.Errorf("%w: cannot specify both template and value", ErrInvalidConfig)
+	}
+	if m.Regex[len(m.Regex)-1].Not != nil {
+		return fmt.Errorf("%w: 'not' cannot be specified for the last regex", ErrInvalidConfig)
 	}
 	return nil
 }
@@ -205,15 +242,12 @@ func (s CSelector) Validate() error {
 }
 
 type NSelector struct {
-	Name     string   `yaml:"name,omitempty" json:"name,omitempty"`
-	Category Regexp   `yaml:"category" json:"category"`
-	Selector *Matcher `yaml:"selector" json:"selector"`
+	Name     string  `yaml:"name,omitempty" json:"name,omitempty"`
+	Category Regexp  `yaml:"category" json:"category"`
+	Selector Matcher `yaml:"selector" json:"selector"`
 }
 
 func (s NSelector) Validate() error {
-	if s.Selector == nil {
-		return fmt.Errorf("%w: node(%s) should have selector", ErrInvalidConfig, s.Name)
-	}
 	if err := s.Selector.Validate(); err != nil {
 		return fmt.Errorf("%w: node(%s)", err, s.Name)
 	}

@@ -28,7 +28,7 @@ func (r Line) String() string {
 	return fmt.Sprintf("at %s:%d:%s", r.Path, r.Linum, r.Content)
 }
 
-func NewWalker(root string, ignores []Regexp) *Walker {
+func NewWalker(root string, ignores []MatchExpr) *Walker {
 	return &Walker{
 		root:    root,
 		ignores: ignores,
@@ -37,12 +37,12 @@ func NewWalker(root string, ignores []Regexp) *Walker {
 
 type Walker struct {
 	root    string
-	ignores []Regexp
+	ignores []MatchExpr
 }
 
 func (w Walker) isSkip(path string) bool {
 	for _, r := range w.ignores {
-		if r.Unwrap().MatchString(path) {
+		if r.Match(path) {
 			return true
 		}
 	}

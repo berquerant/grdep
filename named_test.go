@@ -103,6 +103,10 @@ func TestNamedCategorySelectors(t *testing.T) {
 }
 
 func TestNamedNormalizers(t *testing.T) {
+	newRegexp := func(pattern string) *grdep.Regexp {
+		v := grdep.NewRegexp(pattern)
+		return &v
+	}
 	for _, tc := range []struct {
 		name        string
 		normalizers grdep.NamedNormalizers
@@ -126,8 +130,10 @@ func TestNamedNormalizers(t *testing.T) {
 				{
 					Name: "m1",
 					Matcher: &grdep.Matcher{
-						Regex: []grdep.Regexp{
-							grdep.NewRegexp(`^sh$`),
+						Regex: []grdep.MatchExpr{
+							{
+								Regex: newRegexp(`^sh$`),
+							},
 						},
 						Value: []string{"bash"},
 					},
@@ -147,8 +153,10 @@ func TestNamedNormalizers(t *testing.T) {
 				{
 					Name: "m1",
 					Matcher: &grdep.Matcher{
-						Regex: []grdep.Regexp{
-							grdep.NewRegexp(`^sh$`),
+						Regex: []grdep.MatchExpr{
+							{
+								Regex: newRegexp(`^sh$`),
+							},
 						},
 						Value: []string{"bash"},
 					},
@@ -169,8 +177,10 @@ func TestNamedNormalizers(t *testing.T) {
 				{
 					Name: "m1",
 					Matcher: &grdep.Matcher{
-						Regex: []grdep.Regexp{
-							grdep.NewRegexp(`^sh$`),
+						Regex: []grdep.MatchExpr{
+							{
+								Regex: newRegexp(`^sh$`),
+							},
 						},
 						Value: []string{"bash"},
 					},
@@ -178,8 +188,10 @@ func TestNamedNormalizers(t *testing.T) {
 				{
 					Name: "m2",
 					Matcher: &grdep.Matcher{
-						Regex: []grdep.Regexp{
-							grdep.NewRegexp(`^bash$`),
+						Regex: []grdep.MatchExpr{
+							{
+								Regex: newRegexp(`^bash$`),
+							},
 						},
 						Value: []string{"zsh"},
 					},

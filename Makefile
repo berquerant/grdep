@@ -25,3 +25,7 @@ vuln:
 .PHONY: vet
 vet:
 	go vet ./...
+
+.PHONY: golden
+golden:
+	./cmd/test/update-golden.sh
