@@ -1,22 +1,17 @@
 package grdep
 
-import "sync"
+import (
+	"github.com/berquerant/cache"
+)
 
 // CachedFunc creates a function with in-memory cache using arguments as keys.
 func CachedFunc[I comparable, O any](f func(I) O) func(I) O {
-	var (
-		m   = make(map[I]O)
-		mux sync.Mutex
-	)
-	return func(arg I) O {
-		mux.Lock()
-		defer mux.Unlock()
-		v, exist := m[arg]
-		if exist {
-			return v
-		}
-		r := f(arg)
-		m[arg] = r
-		return r
+	c, _ := cache.NewLRU(1000, func(i I) (O, error) {
+		return f(i), nil
+	})
+
+	return func(i I) O {
+		v, _ := c.Get(i)
+		return v
 	}
 }
