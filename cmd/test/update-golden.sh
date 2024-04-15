@@ -10,4 +10,4 @@ cfg="$(mktemp).yml"
 
 cd "${d}/.."
 "$grdep" skeleton > "$cfg"
-echo "$target" | "$grdep" run "$cfg" > "${d}/golden.json"
+echo "$target" | "$grdep" run "$cfg" | sort > "${d}/golden.json"
