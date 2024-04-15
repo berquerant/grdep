@@ -35,65 +35,116 @@ Use "grdep [command] --help" for more information about a command.
 # 4. Find nodes (dependencies) according to 'node'.
 # 5. Normalize nodes according to 'normalizer.node'.
 #
-# List of regular expressions for files and directories to ignore.
+# The following can be written in matchers:
+#
+# 'r' holds a regexp.
+# If a line matches, then pass it to the next.
+#
+#   matchers:
+#     - r: "REGEXP"
+#
+# 'tmpl' holds a template.
+# If a line mathes, then replace variables in the 'tmpl' and pass it to the next.
+#
+#   matchers:
+#     - r: "REGEXP"
+#     - tmpl: "TEMPLATE"
+#
+# 'val' holds constants.
+# Pass the constants to the next.
+#
+#   matchers:
+#     - val:
+#         - "VALUE1"
+#         - "VALUE2"
+#
+# If a line matches, then pass the constants to the next.
+#
+#   matchers:
+#     - r: "REGEXP"
+#       val:
+#         - "VALUE1"
+#         - "VALUE2"
+#
+# If a line does not match, then pass it to the next.
+#
+#   matchers:
+#     - not: "REGEXP"
+#
+# If a line does not match, then pass the constants to the next.
+#
+#   matchers:
+#     - not: "REGEXP"
+#       val:
+#         - "VALUE1"
+#         - "VALUE2"
+#
+# Invoke the shell script (bash).
+# If the script is successful and outputs something other than whitespaces from stdout,
+# pass it to the next.
+#
+#   matchers:
+#     - sh: "tr ' ' '\n'"
+#
+#
+# List of matchers for files and directories to ignore.
 ignore:
   - r: "ignore"
 # Determine file categories from filename or text.
 category:
   - name: if filename matches then the categories are bash and sh
     filename:
-      regex:
-        - r: "\\.sh$"
-      value:
+      # matchers can be wrtten here
+      - r: "\\.sh$"
+      - val:
         - "bash"
         - "sh"
   - filename: # 'name' is optional
-      # https://pkg.go.dev/regexp#Regexp.ExpandString
       # extract extension as category
-      regex:
-        - r: "\\.(?P<ext>\\w+)$"
-      template: "$ext"
+      - r: "\\.(?P<ext>\\w+)$"
+        tmpl: "$ext"
   - name: if file content matches then the category is bash
     text:
-      regex:
-        - r: "#!/bin/bash"
-      value:
-        - "bash"
+      # matchers can be wrtten here
+      - r: "#!/bin/bash"
+      - val:
+          - "bash"
 # Find dependencies.
 node:
   - name: create bash node
     category: "bash"
-    selector:
-      regex:
-        - r: "^\\. (?P<v>.+)$"
-      template: "$v"
+    matcher:
+      - r: "^\\. (?P<v>.+)$"
+        tmpl: "$v"
   - name: create bin node
     category: ".*"
-    selector:
-      regex:
-        - r: "/usr/bin/\\w+"
+    matcher:
+      - r: "^/usr/bin/"
   - name: local/src but not /usr/local/src
     category: "bash"
-    selector:
-      regex:
-        - not: "/usr/local/src"
-        - r: "local/src/\\w+"
+    matcher:
+      - not: "/usr/local/src"
+      - r: "local/src"
+  - name: install
+    category: "bash"
+    matcher:
+      - r: "^install (?P<v>.+)$"
+        tmpl: "$v"
+      - sh: "tr ' ' '\n'"
 # Normalize categories and nodes.
 # If there is no match, the value remains as is.
 normalizer:
   category:
     - name: sh to bash
       matcher:
-        regex:
-          - r: "^sh$"
-        value:
-          - bash
+        - r: "^sh$"
+        - val:
+            - bash
   node:
     - name: extract binary name
       matcher:
-        regex:
-          - r: "^/usr/bin/(?P<v>\\w+)$"
-        template: "$v"
+        - r: "/usr/bin/(?P<v>\\w+)"
+          tmpl: "$v"
 
 ❯ echo 'some/path' | grdep run skeleton.yml
 ```
