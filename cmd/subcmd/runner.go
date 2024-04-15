@@ -57,7 +57,7 @@ func (r runner) processPath(ctx context.Context, arg PassArg) error {
 		return err
 	}
 
-	for line := range grdep.NewWalker(arg.Path.Text, r.config.Ignores).Walk(ctx) {
+	for line := range grdep.NewWalker(arg.Path.Text, grdep.MatcherSet(r.config.Ignores)).Walk(ctx) {
 		a := arg
 		a.Line = line
 		if err := r.processLine(ctx, a); err != nil {

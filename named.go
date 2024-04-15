@@ -18,7 +18,7 @@ func (m NamedMatcher) GetName() string {
 }
 
 func (m NamedMatcher) Match(src string) ([]string, error) {
-	r, err := m.Matcher.Match(src)
+	r, err := MatcherSet(m.Matcher).Match(src)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", err, m.Name)
 	}

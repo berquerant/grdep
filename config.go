@@ -8,7 +8,9 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"sync"
 
+	"github.com/berquerant/execx"
 	"gopkg.in/yaml.v3"
 )
 
@@ -93,7 +95,6 @@ type Validatable interface {
 
 var (
 	_ Validatable = &Config{}
-	_ Validatable = &MatchExpr{}
 	_ Validatable = &Matcher{}
 	_ Validatable = &NamedMatcher{}
 	_ Validatable = &CSelector{}
@@ -103,7 +104,7 @@ var (
 
 type Config struct {
 	// Ignore files with matching paths.
-	Ignores []MatchExpr `yaml:"ignore,omitempty" json:"ignore,omitempty"`
+	Ignores []Matcher `yaml:"ignore,omitempty" json:"ignore,omitempty"`
 	// Select file category.
 	Categories []CSelector `yaml:"category" json:"category"`
 	// Find nodes corresponding to categories.
@@ -148,50 +149,72 @@ var (
 	ErrInvalidConfig = errors.New("InvalidConfig")
 )
 
-type MatchExpr struct {
-	Regex *Regexp `yaml:"r,omitempty" json:"r,omitempty"`
-	Not   *Regexp `yaml:"not,omitempty" json:"not,omitempty"`
-}
-
-func (m MatchExpr) Validate() error {
-	if !XOR(m.Regex == nil, m.Not == nil) {
-		return fmt.Errorf("%w: specify only either regex or not", ErrInvalidConfig)
-	}
-	return nil
-}
-
 type Matcher struct {
-	Regex    []MatchExpr `yaml:"regex" json:"regex"`
-	Template string      `yaml:"template,omitempty" json:"template,omitempty"`
-	Value    []string    `yaml:"value,omitempty" json:"value,omitempty"`
+	Regex    *Regexp  `yaml:"r,omitempty" json:"r,omitempty"`
+	Not      *Regexp  `yaml:"not,omitempty" json:"not,omitempty"`
+	Shell    string   `yaml:"sh,omitempty" json:"sh,omitempty"`
+	Template string   `yaml:"tmpl,omitempty" json:"tmpl,omitempty"`
+	Value    []string `yaml:"val,omitempty" json:"val,omitempty"`
+
+	shellScript *execx.Script `yaml:"-" json:"-"`
+	mux         sync.Mutex    `yaml:"-" json:"-"`
+}
+
+func (m Matcher) countSettings() int {
+	var c int
+	if m.Regex != nil {
+		c++
+	}
+	if m.Not != nil {
+		c++
+	}
+	if m.Shell != "" {
+		c++
+	}
+	if m.Template != "" {
+		c++
+	}
+	if len(m.Value) > 0 {
+		c++
+	}
+	return c
 }
 
 func (m Matcher) Validate() error {
-	if len(m.Regex) == 0 {
-		return fmt.Errorf("%w: no regex", ErrInvalidConfig)
-	}
-	for i, x := range m.Regex {
-		if err := x.Validate(); err != nil {
-			return fmt.Errorf("%w: regex[%d]", err, i)
+	switch m.countSettings() {
+	case 0:
+		return fmt.Errorf("%w: empty matcher", ErrInvalidConfig)
+	case 1:
+		if m.Template != "" {
+			return fmt.Errorf("%w: tmpl requires r", ErrInvalidConfig)
+		}
+		return nil
+	case 2:
+		switch {
+		case m.Regex != nil:
+			if m.Template != "" || len(m.Value) > 0 {
+				return nil
+			}
+		case m.Not != nil:
+			if len(m.Value) > 0 {
+				return nil
+			}
 		}
 	}
-	if m.Template != "" && len(m.Value) > 0 {
-		return fmt.Errorf("%w: cannot specify both template and value", ErrInvalidConfig)
-	}
-	if m.Regex[len(m.Regex)-1].Not != nil {
-		return fmt.Errorf("%w: 'not' cannot be specified for the last regex", ErrInvalidConfig)
-	}
-	return nil
+
+	return fmt.Errorf("%w: only (r, tmpl), (r, val), (not, val) can be specified at the same time", ErrInvalidConfig)
 }
 
 type NamedMatcher struct {
-	Name    string   `yaml:"name,omitempty" json:"name,omitempty"`
-	Matcher *Matcher `yaml:"matcher" json:"matcher"`
+	Name    string    `yaml:"name,omitempty" json:"name,omitempty"`
+	Matcher []Matcher `yaml:"matcher" json:"matcher"`
 }
 
 func (m NamedMatcher) Validate() error {
-	if err := m.Matcher.Validate(); err != nil {
-		return fmt.Errorf("%w: %s", err, m.Name)
+	for i, x := range m.Matcher {
+		if err := x.Validate(); err != nil {
+			return fmt.Errorf("%w: %s matcher[%d]", err, m.Name, i)
+		}
 	}
 	return nil
 }
@@ -218,38 +241,42 @@ func (n Normalizers) Validate() error {
 }
 
 type CSelector struct {
-	Name     string   `yaml:"name,omitempty" json:"name,omitempty"`
-	Filename *Matcher `yaml:"filename,omitempty" json:"filename,omitempty"`
-	Text     *Matcher `yaml:"text,omitempty" json:"text,omitempty"`
+	Name     string    `yaml:"name,omitempty" json:"name,omitempty"`
+	Filename []Matcher `yaml:"filename,omitempty" json:"filename,omitempty"`
+	Text     []Matcher `yaml:"text,omitempty" json:"text,omitempty"`
 }
 
 func (s CSelector) Validate() error {
-	if !XOR(s.Filename == nil, s.Text == nil) {
+	if !XOR(len(s.Filename) > 0, len(s.Text) > 0) {
 		return fmt.Errorf("%w: category(%s) should have only either filename or text", ErrInvalidConfig, s.Name)
 	}
 
-	if s.Filename != nil {
-		if err := s.Filename.Validate(); err != nil {
-			return fmt.Errorf("%w: category(%s)", err, s.Name)
+	for i, x := range s.Filename {
+		if err := x.Validate(); err != nil {
+			return fmt.Errorf("%w: category(%s) filename[%d]", err, s.Name, i)
 		}
-		return nil
 	}
 
-	if err := s.Text.Validate(); err != nil {
-		return fmt.Errorf("%w: category(%s)", err, s.Name)
+	for i, x := range s.Text {
+		if err := x.Validate(); err != nil {
+			return fmt.Errorf("%w: category(%s) text[%d]", err, s.Name, i)
+		}
 	}
+
 	return nil
 }
 
 type NSelector struct {
-	Name     string  `yaml:"name,omitempty" json:"name,omitempty"`
-	Category Regexp  `yaml:"category" json:"category"`
-	Selector Matcher `yaml:"selector" json:"selector"`
+	Name     string    `yaml:"name,omitempty" json:"name,omitempty"`
+	Category Regexp    `yaml:"category" json:"category"`
+	Matcher  []Matcher `yaml:"matcher" json:"matcher"`
 }
 
 func (s NSelector) Validate() error {
-	if err := s.Selector.Validate(); err != nil {
-		return fmt.Errorf("%w: node(%s)", err, s.Name)
+	for i, x := range s.Matcher {
+		if err := x.Validate(); err != nil {
+			return fmt.Errorf("%w: node(%s) selector[%d]", err, s.Name, i)
+		}
 	}
 	return nil
 }
@@ -296,5 +323,5 @@ func (r *Regexp) UnmarshalJSON(b []byte) error {
 }
 
 func (r Regexp) MarshalJSON() ([]byte, error) {
-	return []byte(r.Unwrap().String()), nil
+	return json.Marshal(r.Unwrap().String())
 }

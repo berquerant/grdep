@@ -13,10 +13,11 @@ func TestConfig(t *testing.T) {
 			zero grdep.Config
 			r1   = grdep.NewRegexp(`r1`)
 			r2   = grdep.NewRegexp(`r2`)
-			e1   = grdep.MatchExpr{
+
+			e1 = grdep.Matcher{
 				Regex: &r1,
 			}
-			e2 = grdep.MatchExpr{
+			e2 = grdep.Matcher{
 				Regex: &r2,
 			}
 			c1 = grdep.CSelector{
@@ -66,14 +67,14 @@ func TestConfig(t *testing.T) {
 			{
 				name: "right zero",
 				left: grdep.Config{
-					Ignores:     []grdep.MatchExpr{e1},
+					Ignores:     []grdep.Matcher{e1},
 					Categories:  []grdep.CSelector{c1},
 					Nodes:       []grdep.NSelector{n1},
 					Normalizers: nr1,
 				},
 				right: zero,
 				want: grdep.Config{
-					Ignores:     []grdep.MatchExpr{e1},
+					Ignores:     []grdep.Matcher{e1},
 					Categories:  []grdep.CSelector{c1},
 					Nodes:       []grdep.NSelector{n1},
 					Normalizers: nr1,
@@ -83,13 +84,13 @@ func TestConfig(t *testing.T) {
 				name: "left zero",
 				left: zero,
 				right: grdep.Config{
-					Ignores:     []grdep.MatchExpr{e1},
+					Ignores:     []grdep.Matcher{e1},
 					Categories:  []grdep.CSelector{c1},
 					Nodes:       []grdep.NSelector{n1},
 					Normalizers: nr1,
 				},
 				want: grdep.Config{
-					Ignores:     []grdep.MatchExpr{e1},
+					Ignores:     []grdep.Matcher{e1},
 					Categories:  []grdep.CSelector{c1},
 					Nodes:       []grdep.NSelector{n1},
 					Normalizers: nr1,
@@ -98,19 +99,19 @@ func TestConfig(t *testing.T) {
 			{
 				name: "add",
 				left: grdep.Config{
-					Ignores:     []grdep.MatchExpr{e1},
+					Ignores:     []grdep.Matcher{e1},
 					Categories:  []grdep.CSelector{c1},
 					Nodes:       []grdep.NSelector{n1},
 					Normalizers: nr1,
 				},
 				right: grdep.Config{
-					Ignores:     []grdep.MatchExpr{e2},
+					Ignores:     []grdep.Matcher{e2},
 					Categories:  []grdep.CSelector{c2},
 					Nodes:       []grdep.NSelector{n2},
 					Normalizers: nr2,
 				},
 				want: grdep.Config{
-					Ignores:    []grdep.MatchExpr{e1, e2},
+					Ignores:    []grdep.Matcher{e1, e2},
 					Categories: []grdep.CSelector{c1, c2},
 					Nodes:      []grdep.NSelector{n1, n2},
 					Normalizers: grdep.Normalizers{
@@ -147,135 +148,54 @@ func TestConfig(t *testing.T) {
 	}
 	emptyRegexp := newRegexp(``)
 
-	t.Run("MatchExpr", func(t *testing.T) {
-		t.Run("Validate", generateValidateTestFunc([]validateTestcase{
-			{
-				name:   "empty",
-				target: &grdep.MatchExpr{},
-				err:    true,
-			},
-			{
-				name: "regex and not",
-				target: &grdep.MatchExpr{
-					Regex: emptyRegexp,
-					Not:   emptyRegexp,
-				},
-				err: true,
-			},
-			{
-				name: "regex",
-				target: &grdep.MatchExpr{
-					Regex: emptyRegexp,
-				},
-			},
-			{
-				name: "not",
-				target: &grdep.MatchExpr{
-					Not: emptyRegexp,
-				},
-			},
-		}))
-	})
-
 	t.Run("Matcher", generateValidateTestFunc([]validateTestcase{
 		{
-			name: "no regex",
+			name:   "nothing",
+			target: &grdep.Matcher{},
+			err:    true,
+		},
+		{
+			name: "regex",
 			target: &grdep.Matcher{
-				Regex: []grdep.MatchExpr{},
+				Regex: emptyRegexp,
+			},
+		},
+		{
+			name: "not",
+			target: &grdep.Matcher{
+				Not: emptyRegexp,
+			},
+		},
+		{
+			name: "shell",
+			target: &grdep.Matcher{
+				Shell: "cat",
+			},
+		},
+		{
+			name: "template",
+			target: &grdep.Matcher{
+				Regex:    emptyRegexp,
+				Template: "template",
+			},
+		},
+		{
+			name: "template without regex",
+			target: &grdep.Matcher{
+				Template: "templ",
 			},
 			err: true,
 		},
 		{
-			name: "template and value",
+			name: "value",
 			target: &grdep.Matcher{
-				Regex: []grdep.MatchExpr{
-					{
-						Regex: emptyRegexp,
-					},
-				},
-				Template: "temp",
-				Value:    []string{"value"},
-			},
-			err: true,
-		},
-		{
-			name: "match all",
-			target: &grdep.Matcher{
-				Regex: []grdep.MatchExpr{
-					{
-						Regex: emptyRegexp,
-					},
-				},
-			},
-		},
-		{
-			name: "match template",
-			target: &grdep.Matcher{
-				Regex: []grdep.MatchExpr{
-					{
-						Regex: emptyRegexp,
-					},
-				},
-				Template: "temp",
-			},
-		},
-		{
-			name: "match value",
-			target: &grdep.Matcher{
-				Regex: []grdep.MatchExpr{
-					{
-						Regex: emptyRegexp,
-					},
-				},
-				Value: []string{"value"},
-			},
-		},
-		{
-			name: "expr tail not",
-			target: &grdep.Matcher{
-				Regex: []grdep.MatchExpr{
-					{
-						Not: emptyRegexp,
-					},
-				},
-			},
-			err: true,
-		},
-		{
-			name: "exprs tail not",
-			target: &grdep.Matcher{
-				Regex: []grdep.MatchExpr{
-					{
-						Regex: emptyRegexp,
-					},
-					{
-						Not: emptyRegexp,
-					},
-				},
-			},
-			err: true,
-		},
-		{
-			name: "exprs",
-			target: &grdep.Matcher{
-				Regex: []grdep.MatchExpr{
-					{
-						Regex: emptyRegexp,
-					},
-					{
-						Regex: emptyRegexp,
-					},
-				},
+				Value: []string{"val"},
 			},
 		},
 	}))
 
-	emptyMatcher := &grdep.Matcher{
-		Regex: []grdep.MatchExpr{
-			{
-				Regex: emptyRegexp,
-			},
-		},
+	emptyMatcher := grdep.Matcher{
+		Regex: emptyRegexp,
 	}
 	t.Run("CSelector", generateValidateTestFunc([]validateTestcase{
 		{
@@ -286,21 +206,21 @@ func TestConfig(t *testing.T) {
 		{
 			name: "filename and text",
 			target: &grdep.CSelector{
-				Filename: emptyMatcher,
-				Text:     emptyMatcher,
+				Filename: []grdep.Matcher{emptyMatcher},
+				Text:     []grdep.Matcher{emptyMatcher},
 			},
 			err: true,
 		},
 		{
 			name: "filename",
 			target: &grdep.CSelector{
-				Filename: emptyMatcher,
+				Filename: []grdep.Matcher{emptyMatcher},
 			},
 		},
 		{
 			name: "text",
 			target: &grdep.CSelector{
-				Text: emptyMatcher,
+				Text: []grdep.Matcher{emptyMatcher},
 			},
 		},
 	}))

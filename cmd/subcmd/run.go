@@ -50,10 +50,10 @@ var runCmd = &cobra.Command{
 
 func newCategorySelector(selector grdep.CSelector) grdep.CategorySelectorIface {
 	if selector.Filename != nil {
-		return grdep.NewFileCategorySelector(selector.Filename)
+		return grdep.NewFileCategorySelector(grdep.MatcherSet(selector.Filename))
 	}
 	return grdep.NewTextCategorySelector(
-		grdep.NewReaderCategorySelector(selector.Text),
+		grdep.NewReaderCategorySelector(grdep.MatcherSet(selector.Text)),
 	)
 }
 
@@ -68,7 +68,9 @@ func newNamedCategorySelectors(categories []grdep.CSelector) grdep.NamedCategory
 func newNamedNodeSelectors(nodes []grdep.NSelector) grdep.NamedNodeSelectors {
 	selectors := make([]*grdep.NamedNodeSelector, len(nodes))
 	for i, x := range nodes {
-		selectors[i] = grdep.NewNamedNodeSelector(x.Name, grdep.NewNodeSelector(x.Category, x.Selector))
+		selectors[i] = grdep.NewNamedNodeSelector(
+			x.Name,
+			grdep.NewNodeSelector(x.Category, grdep.MatcherSet(x.Matcher)))
 	}
 	return grdep.NamedNodeSelectors(selectors)
 }
