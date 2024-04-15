@@ -104,7 +104,7 @@ var (
 
 type Config struct {
 	// Ignore files with matching paths.
-	Ignores []Matcher `yaml:"ignore,omitempty" json:"ignore,omitempty"`
+	Ignores []*Matcher `yaml:"ignore,omitempty" json:"ignore,omitempty"`
 	// Select file category.
 	Categories []CSelector `yaml:"category" json:"category"`
 	// Find nodes corresponding to categories.
@@ -160,7 +160,7 @@ type Matcher struct {
 	mux         sync.Mutex    `yaml:"-" json:"-"`
 }
 
-func (m Matcher) countSettings() int {
+func (m *Matcher) countSettings() int {
 	var c int
 	if m.Regex != nil {
 		c++
@@ -180,7 +180,7 @@ func (m Matcher) countSettings() int {
 	return c
 }
 
-func (m Matcher) Validate() error {
+func (m *Matcher) Validate() error {
 	switch m.countSettings() {
 	case 0:
 		return fmt.Errorf("%w: empty matcher", ErrInvalidConfig)
@@ -206,8 +206,8 @@ func (m Matcher) Validate() error {
 }
 
 type NamedMatcher struct {
-	Name    string    `yaml:"name,omitempty" json:"name,omitempty"`
-	Matcher []Matcher `yaml:"matcher" json:"matcher"`
+	Name    string     `yaml:"name,omitempty" json:"name,omitempty"`
+	Matcher []*Matcher `yaml:"matcher" json:"matcher"`
 }
 
 func (m NamedMatcher) Validate() error {
@@ -241,9 +241,9 @@ func (n Normalizers) Validate() error {
 }
 
 type CSelector struct {
-	Name     string    `yaml:"name,omitempty" json:"name,omitempty"`
-	Filename []Matcher `yaml:"filename,omitempty" json:"filename,omitempty"`
-	Text     []Matcher `yaml:"text,omitempty" json:"text,omitempty"`
+	Name     string     `yaml:"name,omitempty" json:"name,omitempty"`
+	Filename []*Matcher `yaml:"filename,omitempty" json:"filename,omitempty"`
+	Text     []*Matcher `yaml:"text,omitempty" json:"text,omitempty"`
 }
 
 func (s CSelector) Validate() error {
@@ -267,9 +267,9 @@ func (s CSelector) Validate() error {
 }
 
 type NSelector struct {
-	Name     string    `yaml:"name,omitempty" json:"name,omitempty"`
-	Category Regexp    `yaml:"category" json:"category"`
-	Matcher  []Matcher `yaml:"matcher" json:"matcher"`
+	Name     string     `yaml:"name,omitempty" json:"name,omitempty"`
+	Category Regexp     `yaml:"category" json:"category"`
+	Matcher  []*Matcher `yaml:"matcher" json:"matcher"`
 }
 
 func (s NSelector) Validate() error {

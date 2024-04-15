@@ -14,10 +14,10 @@ func TestConfig(t *testing.T) {
 			r1   = grdep.NewRegexp(`r1`)
 			r2   = grdep.NewRegexp(`r2`)
 
-			e1 = grdep.Matcher{
+			e1 = &grdep.Matcher{
 				Regex: &r1,
 			}
-			e2 = grdep.Matcher{
+			e2 = &grdep.Matcher{
 				Regex: &r2,
 			}
 			c1 = grdep.CSelector{
@@ -67,14 +67,14 @@ func TestConfig(t *testing.T) {
 			{
 				name: "right zero",
 				left: grdep.Config{
-					Ignores:     []grdep.Matcher{e1},
+					Ignores:     []*grdep.Matcher{e1},
 					Categories:  []grdep.CSelector{c1},
 					Nodes:       []grdep.NSelector{n1},
 					Normalizers: nr1,
 				},
 				right: zero,
 				want: grdep.Config{
-					Ignores:     []grdep.Matcher{e1},
+					Ignores:     []*grdep.Matcher{e1},
 					Categories:  []grdep.CSelector{c1},
 					Nodes:       []grdep.NSelector{n1},
 					Normalizers: nr1,
@@ -84,13 +84,13 @@ func TestConfig(t *testing.T) {
 				name: "left zero",
 				left: zero,
 				right: grdep.Config{
-					Ignores:     []grdep.Matcher{e1},
+					Ignores:     []*grdep.Matcher{e1},
 					Categories:  []grdep.CSelector{c1},
 					Nodes:       []grdep.NSelector{n1},
 					Normalizers: nr1,
 				},
 				want: grdep.Config{
-					Ignores:     []grdep.Matcher{e1},
+					Ignores:     []*grdep.Matcher{e1},
 					Categories:  []grdep.CSelector{c1},
 					Nodes:       []grdep.NSelector{n1},
 					Normalizers: nr1,
@@ -99,19 +99,19 @@ func TestConfig(t *testing.T) {
 			{
 				name: "add",
 				left: grdep.Config{
-					Ignores:     []grdep.Matcher{e1},
+					Ignores:     []*grdep.Matcher{e1},
 					Categories:  []grdep.CSelector{c1},
 					Nodes:       []grdep.NSelector{n1},
 					Normalizers: nr1,
 				},
 				right: grdep.Config{
-					Ignores:     []grdep.Matcher{e2},
+					Ignores:     []*grdep.Matcher{e2},
 					Categories:  []grdep.CSelector{c2},
 					Nodes:       []grdep.NSelector{n2},
 					Normalizers: nr2,
 				},
 				want: grdep.Config{
-					Ignores:    []grdep.Matcher{e1, e2},
+					Ignores:    []*grdep.Matcher{e1, e2},
 					Categories: []grdep.CSelector{c1, c2},
 					Nodes:      []grdep.NSelector{n1, n2},
 					Normalizers: grdep.Normalizers{
@@ -194,7 +194,7 @@ func TestConfig(t *testing.T) {
 		},
 	}))
 
-	emptyMatcher := grdep.Matcher{
+	emptyMatcher := &grdep.Matcher{
 		Regex: emptyRegexp,
 	}
 	t.Run("CSelector", generateValidateTestFunc([]validateTestcase{
@@ -206,21 +206,21 @@ func TestConfig(t *testing.T) {
 		{
 			name: "filename and text",
 			target: &grdep.CSelector{
-				Filename: []grdep.Matcher{emptyMatcher},
-				Text:     []grdep.Matcher{emptyMatcher},
+				Filename: []*grdep.Matcher{emptyMatcher},
+				Text:     []*grdep.Matcher{emptyMatcher},
 			},
 			err: true,
 		},
 		{
 			name: "filename",
 			target: &grdep.CSelector{
-				Filename: []grdep.Matcher{emptyMatcher},
+				Filename: []*grdep.Matcher{emptyMatcher},
 			},
 		},
 		{
 			name: "text",
 			target: &grdep.CSelector{
-				Text: []grdep.Matcher{emptyMatcher},
+				Text: []*grdep.Matcher{emptyMatcher},
 			},
 		},
 	}))

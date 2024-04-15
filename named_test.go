@@ -129,7 +129,7 @@ func TestNamedNormalizers(t *testing.T) {
 			normalizers: grdep.NamedNormalizers([]grdep.NamedMatcher{
 				{
 					Name: "m1",
-					Matcher: []grdep.Matcher{
+					Matcher: []*grdep.Matcher{
 						{
 							Regex: newRegexp(`^sh$`),
 							Value: []string{"bash"},
@@ -150,7 +150,7 @@ func TestNamedNormalizers(t *testing.T) {
 			normalizers: grdep.NamedNormalizers([]grdep.NamedMatcher{
 				{
 					Name: "m1",
-					Matcher: []grdep.Matcher{
+					Matcher: []*grdep.Matcher{
 						{
 							Regex: newRegexp(`^sh$`),
 							Value: []string{"bash"},
@@ -172,7 +172,7 @@ func TestNamedNormalizers(t *testing.T) {
 			normalizers: grdep.NamedNormalizers([]grdep.NamedMatcher{
 				{
 					Name: "m1",
-					Matcher: []grdep.Matcher{
+					Matcher: []*grdep.Matcher{
 						{
 							Regex: newRegexp(`^sh$`),
 							Value: []string{"bash"},
@@ -181,7 +181,7 @@ func TestNamedNormalizers(t *testing.T) {
 				},
 				{
 					Name: "m2",
-					Matcher: []grdep.Matcher{
+					Matcher: []*grdep.Matcher{
 						{
 							Regex: newRegexp(`^bash$`),
 							Value: []string{"zsh"},

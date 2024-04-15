@@ -14,7 +14,7 @@ import (
 	"github.com/berquerant/execx"
 )
 
-type MatcherSet []Matcher
+type MatcherSet []*Matcher
 
 func (m MatcherSet) Match(src string) ([]string, error) {
 	if len(m) == 0 {
@@ -90,11 +90,11 @@ func (m *Matcher) internalMatch(src string) ([]string, error) {
 	}
 }
 
-func (m Matcher) value(_ string) ([]string, error) {
+func (m *Matcher) value(_ string) ([]string, error) {
 	return m.Value, nil
 }
 
-func (m Matcher) notMatch(src string) ([]string, error) {
+func (m *Matcher) notMatch(src string) ([]string, error) {
 	if !m.Not.Unwrap().MatchString(src) {
 		if len(m.Value) > 0 {
 			return m.Value, nil
@@ -104,7 +104,7 @@ func (m Matcher) notMatch(src string) ([]string, error) {
 	return nil, ErrUnmatched
 }
 
-func (m Matcher) match(src string) ([]string, error) {
+func (m *Matcher) match(src string) ([]string, error) {
 	if m.Regex.Unwrap().MatchString(src) {
 		if len(m.Value) > 0 {
 			return m.Value, nil
@@ -114,7 +114,7 @@ func (m Matcher) match(src string) ([]string, error) {
 	return nil, ErrUnmatched
 }
 
-func (m Matcher) expand(src string) ([]string, error) {
+func (m *Matcher) expand(src string) ([]string, error) {
 	result := []byte{}
 	for _, submatches := range m.Regex.Unwrap().FindAllStringSubmatchIndex(src, -1) {
 		result = m.Regex.Unwrap().ExpandString(result, m.Template, src, submatches)
