@@ -27,5 +27,5 @@ vet:
 	go vet ./...
 
 .PHONY: golden
-golden:
+golden: $(BIN)
 	./cmd/test/update-golden.sh
