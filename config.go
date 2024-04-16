@@ -10,7 +10,6 @@ import (
 	"regexp"
 	"sync"
 
-	"github.com/berquerant/execx"
 	"gopkg.in/yaml.v3"
 )
 
@@ -157,8 +156,8 @@ type Matcher struct {
 	Value    []string `yaml:"val,omitempty" json:"val,omitempty"`
 	Glob     string   `yaml:"g,omitempty" json:"g,omitempty"`
 
-	shellScript *execx.Script `yaml:"-" json:"-"`
-	mux         sync.Mutex    `yaml:"-" json:"-"`
+	shellScript *ShellScript `yaml:"-" json:"-"`
+	mux         sync.Mutex   `yaml:"-" json:"-"`
 }
 
 func (m *Matcher) countSettings() int {

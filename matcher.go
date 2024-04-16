@@ -1,18 +1,14 @@
 package grdep
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"path/filepath"
 	"slices"
 	"strings"
 	"time"
-
-	"github.com/berquerant/execx"
 )
 
 type MatcherSet []*Matcher
@@ -128,10 +124,12 @@ func (m *Matcher) prepareShell() {
 	if m.shellScript != nil {
 		return
 	}
-	m.shellScript = execx.NewScript(m.Shell, "bash")
-	m.shellScript.KeepScriptFile = true
-	m.shellScript.Env.Merge(execx.EnvFromEnviron())
+	m.shellScript = NewShellScript(m.Shell, "bash")
 }
+
+const (
+	shellScriptTimeout = 3 * time.Second
+)
 
 func (m *Matcher) runShell(src string) ([]string, error) {
 	r, err := m.internalRunShell(src)
@@ -142,29 +140,11 @@ func (m *Matcher) runShell(src string) ([]string, error) {
 }
 
 func (m *Matcher) internalRunShell(src string) ([]string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), shellScriptTimeout)
+	defer cancel()
+
 	m.prepareShell()
-
-	var result []string
-	if err := m.shellScript.Runner(func(cmd *execx.Cmd) error {
-		cmd.Stdin = bytes.NewBufferString(src)
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-
-		r, err := cmd.Run(ctx)
-		if err != nil {
-			return err
-		}
-		b, err := io.ReadAll(r.Stdout)
-		if err != nil {
-			return err
-		}
-		result = strings.Split(string(b), "\n")
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-
-	return result, nil
+	return m.shellScript.Run(ctx, src)
 }
 
 func (m *Matcher) glob(src string) ([]string, error) {
