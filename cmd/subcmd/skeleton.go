@@ -55,7 +55,7 @@ const skeletonYAML = `---
 #
 #   matchers:
 #     - r: "REGEXP"
-#       val:
+#     - val:
 #         - "VALUE1"
 #         - "VALUE2"
 #
@@ -68,7 +68,7 @@ const skeletonYAML = `---
 #
 #   matchers:
 #     - not: "REGEXP"
-#       val:
+#     - val:
 #         - "VALUE1"
 #         - "VALUE2"
 #

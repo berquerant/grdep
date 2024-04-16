@@ -190,19 +190,12 @@ func (m *Matcher) Validate() error {
 		}
 		return nil
 	case 2:
-		switch {
-		case m.Regex != nil:
-			if m.Template != "" || len(m.Value) > 0 {
-				return nil
-			}
-		case m.Not != nil:
-			if len(m.Value) > 0 {
-				return nil
-			}
+		if m.Regex != nil && m.Template != "" {
+			return nil
 		}
 	}
 
-	return fmt.Errorf("%w: only (r, tmpl), (r, val), (not, val) can be specified at the same time", ErrInvalidConfig)
+	return fmt.Errorf("%w: only (r, tmpl) can be specified at the same time", ErrInvalidConfig)
 }
 
 type NamedMatcher struct {

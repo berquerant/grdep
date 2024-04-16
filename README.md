@@ -62,7 +62,7 @@ Use "grdep [command] --help" for more information about a command.
 #
 #   matchers:
 #     - r: "REGEXP"
-#       val:
+#     - val:
 #         - "VALUE1"
 #         - "VALUE2"
 #
@@ -75,7 +75,7 @@ Use "grdep [command] --help" for more information about a command.
 #
 #   matchers:
 #     - not: "REGEXP"
-#       val:
+#     - val:
 #         - "VALUE1"
 #         - "VALUE2"
 #

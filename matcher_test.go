@@ -49,8 +49,7 @@ func TestMatcher(t *testing.T) {
 				Regex: newRegexp(`target`),
 				Value: []string{"ret"},
 			},
-			src:  "target",
-			want: []string{"ret"},
+			err: grdep.ErrUnmatched,
 		},
 		{
 			name: "value unmatched",
@@ -67,8 +66,7 @@ func TestMatcher(t *testing.T) {
 				Not:   newRegexp(`not`),
 				Value: []string{"ret"},
 			},
-			src:  "target",
-			want: []string{"ret"},
+			err: grdep.ErrUnmatched,
 		},
 		{
 			name: "npt value unmatched",

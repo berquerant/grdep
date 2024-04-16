@@ -96,9 +96,6 @@ func (m *Matcher) value(_ string) ([]string, error) {
 
 func (m *Matcher) notMatch(src string) ([]string, error) {
 	if !m.Not.Unwrap().MatchString(src) {
-		if len(m.Value) > 0 {
-			return m.Value, nil
-		}
 		return []string{src}, nil
 	}
 	return nil, ErrUnmatched
@@ -106,9 +103,6 @@ func (m *Matcher) notMatch(src string) ([]string, error) {
 
 func (m *Matcher) match(src string) ([]string, error) {
 	if m.Regex.Unwrap().MatchString(src) {
-		if len(m.Value) > 0 {
-			return m.Value, nil
-		}
 		return []string{src}, nil
 	}
 	return nil, ErrUnmatched
