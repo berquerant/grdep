@@ -192,6 +192,12 @@ func TestConfig(t *testing.T) {
 				Value: []string{"val"},
 			},
 		},
+		{
+			name: "glob",
+			target: &grdep.Matcher{
+				Glob: "glob",
+			},
+		},
 	}))
 
 	emptyMatcher := &grdep.Matcher{

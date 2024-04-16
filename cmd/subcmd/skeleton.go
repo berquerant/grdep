@@ -41,7 +41,7 @@ const skeletonYAML = `---
 #
 #   matchers:
 #     - r: "REGEXP"
-#     - tmpl: "TEMPLATE"
+#       tmpl: "TEMPLATE"
 #
 # 'val' holds constants.
 # Pass the constants to the next.
@@ -59,6 +59,7 @@ const skeletonYAML = `---
 #         - "VALUE1"
 #         - "VALUE2"
 #
+# 'not' holds a regexp.
 # If a line does not match, then pass it to the next.
 #
 #   matchers:
@@ -72,13 +73,19 @@ const skeletonYAML = `---
 #         - "VALUE1"
 #         - "VALUE2"
 #
+# 'sh' holds a script.
 # Invoke the shell script (bash).
 # If the script is successful and outputs something other than whitespaces from stdout,
 # pass it to the next.
 #
 #   matchers:
-#     - sh: "tr ' ' '\n'"
+#     - sh: "BASH"
 #
+# 'g' holds a glob.
+# If a line matches, then pass it to the next.
+#
+#   matchers:
+#     - g: "GLOB"
 #
 # List of matchers for files and directories to ignore.
 ignore:
@@ -124,6 +131,10 @@ node:
       - r: "^install (?P<v>.+)$"
         tmpl: "$v"
       - sh: "tr ' ' '\n'"
+  - name: docker from
+    category: "dockerfile"
+    matcher:
+      - g: "FROM*"
 # Normalize categories and nodes.
 # If there is no match, the value remains as is.
 normalizer:

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"path/filepath"
 	"slices"
 	"strings"
 	"time"
@@ -77,6 +78,8 @@ func (m *Matcher) internalMatch(src string) ([]string, error) {
 	switch {
 	case m.Shell != "":
 		return m.runShell(src)
+	case m.Glob != "":
+		return m.glob(src)
 	case m.Not != nil:
 		return m.notMatch(src)
 	case m.Template != "":
@@ -162,4 +165,15 @@ func (m *Matcher) internalRunShell(src string) ([]string, error) {
 	}
 
 	return result, nil
+}
+
+func (m *Matcher) glob(src string) ([]string, error) {
+	matched, err := filepath.Match(m.Glob, src)
+	if err != nil {
+		return nil, errors.Join(ErrUnmatched, err)
+	}
+	if !matched {
+		return nil, ErrUnmatched
+	}
+	return []string{src}, nil
 }

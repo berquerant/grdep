@@ -103,6 +103,22 @@ func TestMatcher(t *testing.T) {
 			src:  "/bin/a,/bin/b",
 			want: []string{"/bin/a,/bin/b"},
 		},
+		{
+			name: "glob",
+			matcher: &grdep.Matcher{
+				Glob: "p*",
+			},
+			src:  "pr",
+			want: []string{"pr"},
+		},
+		{
+			name: "glob",
+			matcher: &grdep.Matcher{
+				Glob: "p*",
+			},
+			src: "rp",
+			err: grdep.ErrUnmatched,
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			got, err := tc.matcher.Match(tc.src)

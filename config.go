@@ -155,6 +155,7 @@ type Matcher struct {
 	Shell    string   `yaml:"sh,omitempty" json:"sh,omitempty"`
 	Template string   `yaml:"tmpl,omitempty" json:"tmpl,omitempty"`
 	Value    []string `yaml:"val,omitempty" json:"val,omitempty"`
+	Glob     string   `yaml:"g,omitempty" json:"g,omitempty"`
 
 	shellScript *execx.Script `yaml:"-" json:"-"`
 	mux         sync.Mutex    `yaml:"-" json:"-"`
@@ -175,6 +176,9 @@ func (m *Matcher) countSettings() int {
 		c++
 	}
 	if len(m.Value) > 0 {
+		c++
+	}
+	if m.Glob != "" {
 		c++
 	}
 	return c
