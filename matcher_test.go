@@ -20,6 +20,28 @@ func TestMatcher(t *testing.T) {
 		err     error
 	}{
 		{
+			name: "exec lua fail",
+			matcher: &grdep.Matcher{
+				Lua: `function f(src)
+  return "
+end`,
+				LuaEntryPoint: "f",
+			},
+			src: "1",
+			err: grdep.ErrUnmatched,
+		},
+		{
+			name: "exec lua",
+			matcher: &grdep.Matcher{
+				Lua: `function f(src)
+  return src .. "\n!"
+end`,
+				LuaEntryPoint: "f",
+			},
+			src:  "1",
+			want: []string{"1", "!"},
+		},
+		{
 			name: "exec sh fail",
 			matcher: &grdep.Matcher{
 				Shell: "grep unmatch",
@@ -121,6 +143,7 @@ func TestMatcher(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
+			defer tc.matcher.Close()
 			got, err := tc.matcher.Match(tc.src)
 			if tc.err != nil {
 				assert.ErrorIs(t, err, tc.err)
@@ -136,4 +159,8 @@ type MockMatcherFunc func() ([]string, error)
 
 func (f MockMatcherFunc) Match(_ string) ([]string, error) {
 	return f()
+}
+
+func (MockMatcherFunc) Close() error {
+	return nil
 }

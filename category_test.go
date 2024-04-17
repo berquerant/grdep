@@ -58,7 +58,9 @@ func TestReaderCategorySelector(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := grdep.NewReaderCategorySelector(tc.matcher).Select(tc.r)
+			s := grdep.NewReaderCategorySelector(tc.matcher)
+			defer s.Close()
+			got, err := s.Select(tc.r)
 			if tc.err != nil {
 				assert.ErrorIs(t, err, tc.err)
 				return

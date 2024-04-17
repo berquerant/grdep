@@ -13,6 +13,13 @@ import (
 
 type MatcherSet []*Matcher
 
+func (m MatcherSet) Close() error {
+	for _, x := range m {
+		_ = x.Close()
+	}
+	return nil
+}
+
 func (m MatcherSet) Match(src string) ([]string, error) {
 	if len(m) == 0 {
 		return nil, ErrUnmatched
@@ -46,6 +53,7 @@ func (m MatcherSet) Match(src string) ([]string, error) {
 
 type MatcherIface interface {
 	Match(src string) ([]string, error)
+	Close() error
 }
 
 var (
@@ -72,6 +80,8 @@ func (m *Matcher) Match(src string) ([]string, error) {
 
 func (m *Matcher) internalMatch(src string) ([]string, error) {
 	switch {
+	case m.LuaEntryPoint != "":
+		return m.runLua(src)
 	case m.Shell != "":
 		return m.runShell(src)
 	case m.Glob != "":
@@ -87,6 +97,20 @@ func (m *Matcher) internalMatch(src string) ([]string, error) {
 	default:
 		return nil, ErrUnmatched
 	}
+}
+
+func (m *Matcher) Close() error {
+	if m == nil {
+		return nil
+	}
+
+	m.mux.Lock()
+	defer m.mux.Unlock()
+
+	if m.luaScript != nil {
+		m.luaScript.Close()
+	}
+	return nil
 }
 
 func (m *Matcher) value(_ string) ([]string, error) {
@@ -118,6 +142,10 @@ func (m *Matcher) expand(src string) ([]string, error) {
 	return []string{string(result)}, nil
 }
 
+const (
+	shellScriptTimeout = 3 * time.Second
+)
+
 func (m *Matcher) prepareShell() {
 	m.mux.Lock()
 	defer m.mux.Unlock()
@@ -126,10 +154,6 @@ func (m *Matcher) prepareShell() {
 	}
 	m.shellScript = NewShellScript(m.Shell, "bash")
 }
-
-const (
-	shellScriptTimeout = 3 * time.Second
-)
 
 func (m *Matcher) runShell(src string) ([]string, error) {
 	r, err := m.internalRunShell(src)
@@ -156,4 +180,42 @@ func (m *Matcher) glob(src string) ([]string, error) {
 		return nil, ErrUnmatched
 	}
 	return []string{src}, nil
+}
+
+func (m *Matcher) prepareLua() error {
+	m.mux.Lock()
+	defer m.mux.Unlock()
+
+	if m.luaScript != nil {
+		return nil
+	}
+	var (
+		s   *LuaScript
+		err error
+	)
+	if m.LuaFile != "" {
+		s, err = NewLuaScriptFromFile(m.LuaFile, m.LuaEntryPoint)
+	} else {
+		s, err = NewLuaScript(m.Lua, m.LuaEntryPoint)
+	}
+	if err != nil {
+		return err
+	}
+	m.luaScript = s
+	return nil
+}
+
+func (m *Matcher) runLua(src string) ([]string, error) {
+	r, err := m.internalRunLua(src)
+	if err != nil {
+		return nil, errors.Join(ErrUnmatched, err)
+	}
+	return r, nil
+}
+
+func (m *Matcher) internalRunLua(src string) ([]string, error) {
+	if err := m.prepareLua(); err != nil {
+		return nil, err
+	}
+	return m.luaScript.Run(src)
 }

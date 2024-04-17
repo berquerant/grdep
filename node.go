@@ -2,6 +2,7 @@ package grdep
 
 type NodeSelectorIface interface {
 	Select(category, content string) ([]string, error)
+	Close() error
 }
 
 var (
@@ -29,4 +30,11 @@ func (n NodeSelector) Select(category, content string) ([]string, error) {
 		return nil, err
 	}
 	return r, nil
+}
+
+func (n NodeSelector) Close() error {
+	if n.selector == nil {
+		return nil
+	}
+	return n.selector.Close()
 }

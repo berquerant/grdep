@@ -31,6 +31,13 @@ var runCmd = &cobra.Command{
 			categoryOnly, _     = cmd.Flags().GetBool("category")
 		)
 
+		defer func() {
+			_ = categories.Close()
+			_ = nodes.Close()
+			_ = categoryNormalizers.Close()
+			_ = nodeNormalizers.Close()
+		}()
+
 		r := runner{
 			config:     config,
 			r:          os.Stdin,

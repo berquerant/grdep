@@ -149,14 +149,18 @@ var (
 )
 
 type Matcher struct {
-	Regex    *Regexp  `yaml:"r,omitempty" json:"r,omitempty"`
-	Not      *Regexp  `yaml:"not,omitempty" json:"not,omitempty"`
-	Shell    string   `yaml:"sh,omitempty" json:"sh,omitempty"`
-	Template string   `yaml:"tmpl,omitempty" json:"tmpl,omitempty"`
-	Value    []string `yaml:"val,omitempty" json:"val,omitempty"`
-	Glob     string   `yaml:"g,omitempty" json:"g,omitempty"`
+	Regex         *Regexp  `yaml:"r,omitempty" json:"r,omitempty"`
+	Not           *Regexp  `yaml:"not,omitempty" json:"not,omitempty"`
+	Shell         string   `yaml:"sh,omitempty" json:"sh,omitempty"`
+	Template      string   `yaml:"tmpl,omitempty" json:"tmpl,omitempty"`
+	Value         []string `yaml:"val,omitempty" json:"val,omitempty"`
+	Glob          string   `yaml:"g,omitempty" json:"g,omitempty"`
+	Lua           string   `yaml:"lua,omitempty" json:"lua,omitempty"`
+	LuaFile       string   `yaml:"lua_file,omitempty" json:"lua_file,omitempty"`
+	LuaEntryPoint string   `yaml:"lua_call,omitempty" json:"lua_call,omitempty"`
 
 	shellScript *ShellScript `yaml:"-" json:"-"`
+	luaScript   *LuaScript   `yaml:"-" json:"-"`
 	mux         sync.Mutex   `yaml:"-" json:"-"`
 }
 
@@ -180,6 +184,15 @@ func (m *Matcher) countSettings() int {
 	if m.Glob != "" {
 		c++
 	}
+	if m.Lua != "" {
+		c++
+	}
+	if m.LuaFile != "" {
+		c++
+	}
+	if m.LuaEntryPoint != "" {
+		c++
+	}
 	return c
 }
 
@@ -188,17 +201,33 @@ func (m *Matcher) Validate() error {
 	case 0:
 		return fmt.Errorf("%w: empty matcher", ErrInvalidConfig)
 	case 1:
-		if m.Template != "" {
+		switch {
+		case m.Template != "":
 			return fmt.Errorf("%w: tmpl requires r", ErrInvalidConfig)
-		}
-		return nil
-	case 2:
-		if m.Regex != nil && m.Template != "" {
+		case m.LuaEntryPoint != "":
+			return fmt.Errorf("%w: lua_call requires lua or lua_file", ErrInvalidConfig)
+		case m.Lua != "":
+			return fmt.Errorf("%w: lua requires lua_call", ErrInvalidConfig)
+		case m.LuaFile != "":
+			return fmt.Errorf("%w: lua_file requires lua_call", ErrInvalidConfig)
+		default:
 			return nil
+		}
+	case 2:
+		switch {
+		case m.Regex != nil && m.Template != "":
+			return nil
+		case m.LuaEntryPoint != "":
+			if m.Lua != "" || m.LuaFile != "" {
+				return nil
+			}
 		}
 	}
 
-	return fmt.Errorf("%w: only (r, tmpl) can be specified at the same time", ErrInvalidConfig)
+	return fmt.Errorf(
+		"%w: only (r, tmpl), (lua, lua_call), (lua_file, lua_call) can be specified at the same time",
+		ErrInvalidConfig,
+	)
 }
 
 type NamedMatcher struct {

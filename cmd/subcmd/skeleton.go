@@ -33,27 +33,27 @@ const skeletonYAML = `---
 # 'r' holds a regexp.
 # If a line matches, then pass it to the next.
 #
-#   matchers:
+#   matcher:
 #     - r: "REGEXP"
 #
 # 'tmpl' holds a template.
 # If a line mathes, then replace variables in the 'tmpl' and pass it to the next.
 #
-#   matchers:
+#   matcher:
 #     - r: "REGEXP"
 #       tmpl: "TEMPLATE"
 #
 # 'val' holds constants.
 # Pass the constants to the next.
 #
-#   matchers:
+#   matcher:
 #     - val:
 #         - "VALUE1"
 #         - "VALUE2"
 #
 # If a line matches, then pass the constants to the next.
 #
-#   matchers:
+#   matcher:
 #     - r: "REGEXP"
 #     - val:
 #         - "VALUE1"
@@ -62,12 +62,12 @@ const skeletonYAML = `---
 # 'not' holds a regexp.
 # If a line does not match, then pass it to the next.
 #
-#   matchers:
+#   matcher:
 #     - not: "REGEXP"
 #
 # If a line does not match, then pass the constants to the next.
 #
-#   matchers:
+#   matcher:
 #     - not: "REGEXP"
 #     - val:
 #         - "VALUE1"
@@ -78,14 +78,32 @@ const skeletonYAML = `---
 # If the script is successful and outputs something other than whitespaces from stdout,
 # pass it to the next.
 #
-#   matchers:
+#   matcher:
 #     - sh: "BASH"
 #
 # 'g' holds a glob.
 # If a line matches, then pass it to the next.
 #
-#   matchers:
+#   matcher:
 #     - g: "GLOB"
+#
+# 'lua' holds a lua script.
+# 'lua_call' holds an entrypoint.
+# LUA_SCRIPT should contain a function named LUA_ENTRYPOINT.
+# The function should takes a string as an argument and returns a string.
+# If the script is successful and outputs something other than whitespaces from stdout,
+# pass it to the next.
+#
+#   matcher:
+#     - lua: LUA_SCRIPT
+#       lua_call: "LUA_ENTRYPOINT"
+#
+# 'lua_file' holds a lua script file.
+#
+#   matcher:
+#     - lua_file: "LUA_SCRIPT_FILE"
+#       lua_call: "LUA_ENTRYPOINT"
+#
 #
 # List of matchers for files and directories to ignore.
 ignore:
@@ -135,6 +153,17 @@ node:
     category: "dockerfile"
     matcher:
       - g: "FROM*"
+  - name: docker entrypoint
+    category: "dockerfile"
+    matcher:
+      - g: "ENTRY*"
+      - sh: "cut -d '[' -f 2"
+      - sh: "cut -d ']' -f 1"
+      - lua: |
+          function up(src)
+            return string.upper(string.gsub(src, "\"", ""))
+          end
+        lua_call: up
 # Normalize categories and nodes.
 # If there is no match, the value remains as is.
 normalizer:

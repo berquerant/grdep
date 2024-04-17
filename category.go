@@ -10,6 +10,7 @@ import (
 
 type CategorySelectorIface interface {
 	Select(path string) ([]string, error)
+	Close() error
 }
 
 var (
@@ -33,6 +34,13 @@ type FileCategorySelector struct {
 	matcher MatcherIface
 }
 
+func (c FileCategorySelector) Close() error {
+	if c.matcher == nil {
+		return nil
+	}
+	return c.matcher.Close()
+}
+
 func (c FileCategorySelector) Select(path string) ([]string, error) {
 	r, err := c.matcher.Match(path)
 	if err != nil {
@@ -43,6 +51,10 @@ func (c FileCategorySelector) Select(path string) ([]string, error) {
 
 type TextCategorySelector struct {
 	reader *ReaderCategorySelector
+}
+
+func (s *TextCategorySelector) Close() error {
+	return s.reader.Close()
 }
 
 func (c TextCategorySelector) Select(path string) ([]string, error) {
@@ -67,6 +79,10 @@ func NewReaderCategorySelector(matcher MatcherIface) *ReaderCategorySelector {
 
 type ReaderCategorySelector struct {
 	matcher MatcherIface
+}
+
+func (s ReaderCategorySelector) Close() error {
+	return s.matcher.Close()
 }
 
 func (s ReaderCategorySelector) Select(r io.Reader) ([]string, error) {

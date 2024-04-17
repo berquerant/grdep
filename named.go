@@ -17,6 +17,10 @@ func (m NamedMatcher) GetName() string {
 	return m.Name
 }
 
+func (m NamedMatcher) Close() error {
+	return MatcherSet(m.Matcher).Close()
+}
+
 func (m NamedMatcher) Match(src string) ([]string, error) {
 	r, err := MatcherSet(m.Matcher).Match(src)
 	if err != nil {
@@ -48,6 +52,13 @@ func (s NamedCategorySelector) GetName() string {
 	return s.name
 }
 
+func (s NamedCategorySelector) Close() error {
+	if s.selector == nil {
+		return nil
+	}
+	return s.selector.Close()
+}
+
 func (s NamedCategorySelector) Select(path string) ([]string, error) {
 	category, err := s.selector.Select(path)
 	if err != nil {
@@ -57,6 +68,13 @@ func (s NamedCategorySelector) Select(path string) ([]string, error) {
 }
 
 type NamedCategorySelectors []*NamedCategorySelector
+
+func (s NamedCategorySelectors) Close() error {
+	for _, x := range s {
+		_ = x.Close()
+	}
+	return nil
+}
 
 func (s NamedCategorySelectors) Select(path string) []NamedSelectorResult {
 	result := []NamedSelectorResult{}
@@ -97,6 +115,13 @@ func (s NamedNodeSelector) GetName() string {
 	return s.name
 }
 
+func (s NamedNodeSelector) Close() error {
+	if s.selector == nil {
+		return nil
+	}
+	return s.selector.Close()
+}
+
 func (s NamedNodeSelector) Select(category, content string) ([]string, error) {
 	r, err := s.selector.Select(category, content)
 	if err != nil {
@@ -106,6 +131,13 @@ func (s NamedNodeSelector) Select(category, content string) ([]string, error) {
 }
 
 type NamedNodeSelectors []*NamedNodeSelector
+
+func (s NamedNodeSelectors) Close() error {
+	for _, x := range s {
+		_ = x.Close()
+	}
+	return nil
+}
 
 func (s NamedNodeSelectors) Select(category, content string) []NamedSelectorResult {
 	result := []NamedSelectorResult{}
@@ -131,6 +163,13 @@ func (s NamedNodeSelectors) Select(category, content string) []NamedSelectorResu
 }
 
 type NamedNormalizers []NamedMatcher
+
+func (n NamedNormalizers) Close() error {
+	for _, x := range n {
+		_ = x.Close()
+	}
+	return nil
+}
 
 type NamedNormalizerResult struct {
 	Index  int    `json:"index"`

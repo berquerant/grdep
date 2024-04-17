@@ -14,6 +14,10 @@ func (f MockCategorySelectorFunc) Select(_ string) ([]string, error) {
 	return f()
 }
 
+func (MockCategorySelectorFunc) Close() error {
+	return nil
+}
+
 func TestNamedCategorySelectors(t *testing.T) {
 	for _, tc := range []struct {
 		name      string
@@ -96,6 +100,7 @@ func TestNamedCategorySelectors(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
+			defer tc.selectors.Close()
 			got := tc.selectors.Select("")
 			assert.Equal(t, tc.want, got)
 		})
@@ -206,6 +211,7 @@ func TestNamedNormalizers(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
+			defer tc.normalizers.Close()
 			got := tc.normalizers.Normalize(tc.src)
 			assert.Equal(t, tc.want, got)
 		})

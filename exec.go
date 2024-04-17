@@ -3,6 +3,7 @@ package grdep
 import (
 	"bytes"
 	"context"
+	"errors"
 	"io"
 	"strings"
 
@@ -22,17 +23,22 @@ func NewShellScript(content, shell string) *ShellScript {
 	}
 }
 
+var (
+	ErrShellRun        = errors.New("ShellRun")
+	ErrShellReadStdout = errors.New("ShellReadStdout")
+)
+
 func (s ShellScript) Run(ctx context.Context, src string) ([]string, error) {
 	var result []string
 	if err := s.script.Runner(func(cmd *execx.Cmd) error {
 		cmd.Stdin = bytes.NewBufferString(src)
 		r, err := cmd.Run(ctx)
 		if err != nil {
-			return err
+			return errors.Join(ErrShellRun, err)
 		}
 		b, err := io.ReadAll(r.Stdout)
 		if err != nil {
-			return err
+			return errors.Join(ErrShellReadStdout, err)
 		}
 		result = strings.Split(string(b), "\n")
 		return nil

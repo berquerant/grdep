@@ -198,6 +198,27 @@ func TestConfig(t *testing.T) {
 				Glob: "glob",
 			},
 		},
+		{
+			name: "lua",
+			target: &grdep.Matcher{
+				Lua:           `lua`,
+				LuaEntryPoint: "e",
+			},
+		},
+		{
+			name: "luafile",
+			target: &grdep.Matcher{
+				LuaFile:       `lua`,
+				LuaEntryPoint: "e",
+			},
+		},
+		{
+			name: "lua without entrypoint",
+			target: &grdep.Matcher{
+				Lua: `lua`,
+			},
+			err: true,
+		},
 	}))
 
 	emptyMatcher := &grdep.Matcher{

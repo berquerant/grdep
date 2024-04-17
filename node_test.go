@@ -47,6 +47,7 @@ func TestNodeSelector(t *testing.T) {
 			},
 		} {
 			t.Run(tc.name, func(t *testing.T) {
+				defer tc.selector.Close()
 				got, err := tc.selector.Select(tc.category, tc.content)
 				if tc.err != nil {
 					assert.ErrorIs(t, err, tc.err)
