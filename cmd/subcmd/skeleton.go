@@ -115,8 +115,8 @@ category:
       # matchers can be wrtten here
       - r: "\\.sh$"
       - val:
-        - "bash"
-        - "sh"
+          - "bash"
+          - "sh"
   - filename: # 'name' is optional
       # extract extension as category
       - r: "\\.(?P<ext>\\w+)$"
