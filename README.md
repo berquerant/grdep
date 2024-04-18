@@ -98,8 +98,7 @@ Use "grdep [command] --help" for more information about a command.
 # 'lua_call' holds an entrypoint.
 # LUA_SCRIPT should contain a function named LUA_ENTRYPOINT.
 # The function should takes a string as an argument and returns a string.
-# If the script is successful and outputs something other than whitespaces from stdout,
-# pass it to the next.
+# If the script is successful and returns something other than whitespaces, pass it to the next.
 #
 #   matcher:
 #     - lua: LUA_SCRIPT
