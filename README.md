@@ -2,7 +2,7 @@
 
 ```
 ❯ grdep -h
-Find depdendencies by grep
+Find dependencies by grep.
 
 Usage:
   grdep [command]

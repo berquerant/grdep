@@ -24,7 +24,7 @@ func getDebug(cmd *cobra.Command) bool {
 
 var rootCmd = &cobra.Command{
 	Use:   "grdep",
-	Short: "Find depdendencies by grep",
+	Short: "Find dependencies by grep.",
 }
 
 func Execute() error {
