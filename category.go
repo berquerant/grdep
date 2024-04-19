@@ -57,14 +57,14 @@ func (s *TextCategorySelector) Close() error {
 	return s.reader.Close()
 }
 
-func (c TextCategorySelector) Select(path string) ([]string, error) {
+func (s TextCategorySelector) Select(path string) ([]string, error) {
 	fp, err := os.Open(path)
 	if err != nil {
 		return nil, fmt.Errorf("%w: text category %s", err, path)
 	}
 	defer fp.Close()
 
-	rs, err := c.reader.Select(fp)
+	rs, err := s.reader.Select(fp)
 	if err != nil {
 		return nil, fmt.Errorf("%w: text category %s", err, path)
 	}
