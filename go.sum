@@ -2,6 +2,8 @@ github.com/berquerant/cache v0.2.0 h1:hEjriDUWuAWGJN4x6lTlK+krfVWj9ORZPkEmlUuHze
 github.com/berquerant/cache v0.2.0/go.mod h1:HNl7u7elq9Mqwzk5SBNARyqWgjDzle6SeZNvqcPoEhk=
 github.com/berquerant/execx v0.2.0 h1:ovfO/QesUuer6EssCZLGWWZptYv14MydR90jroBhIsI=
 github.com/berquerant/execx v0.2.0/go.mod h1:hH8WKmZYJwpPfPaVSgLFPWgtd3pVCbbPDaXx9aHnmh8=
+github.com/berquerant/execx v0.4.0 h1:g38OxsEUDsO8WS2hwT1URFak3GP9uPneB8A7h+GdqRY=
+github.com/berquerant/execx v0.4.0/go.mod h1:hH8WKmZYJwpPfPaVSgLFPWgtd3pVCbbPDaXx9aHnmh8=
 github.com/cpuguy83/go-md2man/v2 v2.0.3/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -32,6 +34,8 @@ golang.org/x/tools v0.20.0 h1:hz/CVckiOxybQvFw6h7b/q80NTr9IUQb4s1IIzW7KNY=
 golang.org/x/tools v0.20.0/go.mod h1:WvitBU7JJf6A4jOdg4S1tviW9bhUxkgeCui/0JHctQg=
 golang.org/x/vuln v1.0.4 h1:SP0mPeg2PmGCu03V+61EcQiOjmpri2XijexKdzv8Z1I=
 golang.org/x/vuln v1.0.4/go.mod h1:NbJdUQhX8jY++FtuhrXs2Eyx0yePo9pF7nPlIjo9aaQ=
+golang.org/x/vuln v1.1.0 h1:ECEdI+aEtjpF90eqEcDL5Q11DWSZAw5PJQWlp0+gWqc=
+golang.org/x/vuln v1.1.0/go.mod h1:HT/Ar8fE34tbxWG2s7PYjVl+iIE4Er36/940Z+K540Y=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
