@@ -9,6 +9,10 @@ import (
 
 func init() {
 	runCmd.Flags().BoolP("category", "C", false, "Determine category and exit")
+	runCmd.Flags().String("profile.name", "", `Enable profiling.
+cpu, goroutine, heap, threadcreate, block, mutex are available.
+See https://pkg.go.dev/runtime/pprof#Profile`)
+	runCmd.Flags().String("profile.dir", "", "Profile output directory, default generates a temporary directory.")
 	rootCmd.AddCommand(runCmd)
 }
 
@@ -17,6 +21,20 @@ var runCmd = &cobra.Command{
 	Short: "Find dependencies",
 	Long:  "Find dependencies. Treat each line of standard input as a path to search.",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if name, _ := cmd.Flags().GetString("profile.name"); name != "" {
+			dir, _ := cmd.Flags().GetString("profile.dir")
+			if dir == "" {
+				d, err := os.MkdirTemp("", "grdep.profiler")
+				if err != nil {
+					return err
+				}
+				dir = d
+			}
+
+			stop := grdep.NewProfiler(dir).Start(name)
+			defer stop()
+		}
+
 		logger := getLogger(cmd, os.Stderr)
 		config, err := parseConfigs(args)
 		if err != nil {
