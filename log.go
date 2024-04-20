@@ -3,7 +3,12 @@ package grdep
 import (
 	"io"
 	"log/slog"
+	"os"
 )
+
+func init() {
+	_ = NewLogger(os.Stderr, slog.LevelInfo)
+}
 
 func NewLogger(w io.Writer, level slog.Leveler) *slog.Logger {
 	logger := slog.New(slog.NewJSONHandler(w, &slog.HandlerOptions{
