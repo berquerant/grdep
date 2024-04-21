@@ -21,6 +21,7 @@ type runner struct {
 	w                  io.Writer
 	logger             *slog.Logger
 	isDebug            bool
+	ignores            grdep.MatcherIface
 	categories         func(string) []grdep.NamedSelectorResult
 	nodes              func(category, content string) []grdep.NamedSelectorResult
 	categoryNormalizer func(string) []grdep.NamedNormalizerResult
@@ -57,7 +58,7 @@ func (r runner) processPath(ctx context.Context, arg PassArg) error {
 		return err
 	}
 
-	for line := range grdep.NewWalker(arg.Path.Text, grdep.MatcherSet(r.config.Ignores)).Walk(ctx) {
+	for line := range grdep.NewWalker(arg.Path.Text, r.ignores).Walk(ctx) {
 		a := arg
 		a.Line = line
 		if err := r.processLine(ctx, a); err != nil {

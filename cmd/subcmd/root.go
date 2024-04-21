@@ -15,6 +15,7 @@ import (
 
 func init() {
 	rootCmd.PersistentFlags().Bool("debug", false, "Enable debug logs")
+	rootCmd.PersistentFlags().Bool("metrics", false, "Show metrics")
 }
 
 func getDebug(cmd *cobra.Command) bool {
@@ -25,6 +26,13 @@ func getDebug(cmd *cobra.Command) bool {
 var rootCmd = &cobra.Command{
 	Use:   "grdep",
 	Short: "Find dependencies by grep.",
+	PersistentPostRunE: func(cmd *cobra.Command, _ []string) error {
+		enableMetrics, _ := cmd.Flags().GetBool("metrics")
+		if enableMetrics {
+			showMetrics()
+		}
+		return nil
+	},
 }
 
 func Execute() error {
@@ -36,6 +44,12 @@ func Execute() error {
 		return err
 	}
 	return nil
+}
+
+func showMetrics() {
+	grdep.GetMetrics().Walk(func(key string, value uint64) {
+		grdep.L().Info("metrics", "key", key, "value", value)
+	})
 }
 
 func getLogger(cmd *cobra.Command, w io.Writer) *slog.Logger {

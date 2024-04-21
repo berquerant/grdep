@@ -23,6 +23,7 @@ func (m NamedMatcher) Close() error {
 
 func (m NamedMatcher) Match(src string) ([]string, error) {
 	r, err := MatcherSet(m.Matcher).Match(src)
+	AddMetric(fmt.Sprintf("named-matcher-%s", m.Name), err)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", err, m.Name)
 	}
@@ -61,6 +62,7 @@ func (s NamedCategorySelector) Close() error {
 
 func (s NamedCategorySelector) Select(path string) ([]string, error) {
 	category, err := s.selector.Select(path)
+	AddMetric(fmt.Sprintf("named-category-selector-%s", s.name), err)
 	if err != nil {
 		return nil, fmt.Errorf("%w: category(%s)", err, s.name)
 	}
@@ -124,6 +126,7 @@ func (s NamedNodeSelector) Close() error {
 
 func (s NamedNodeSelector) Select(category, content string) ([]string, error) {
 	r, err := s.selector.Select(category, content)
+	AddMetric(fmt.Sprintf("named-node-selector-%s", s.name), err)
 	if err != nil {
 		return nil, fmt.Errorf("%w: node(%s)", err, s.name)
 	}
@@ -179,7 +182,9 @@ type NamedNormalizerResult struct {
 
 func (n NamedNormalizers) Normalize(src string) []NamedNormalizerResult {
 	for idx, matcher := range n {
-		if rs, err := matcher.Match(src); err == nil {
+		rs, err := matcher.Match(src)
+		AddMetric(fmt.Sprintf("named-normalizer-%s", matcher.Name), err)
+		if err == nil {
 			result := make([]NamedNormalizerResult, len(rs))
 			for i, r := range rs {
 				result[i] = NamedNormalizerResult{

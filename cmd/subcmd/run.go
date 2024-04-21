@@ -41,6 +41,7 @@ var runCmd = &cobra.Command{
 			return err
 		}
 		var (
+			ignores             = grdep.NewNamedMatcherSet("ignore", grdep.MatcherSet(config.Ignores))
 			categories          = newNamedCategorySelectors(config.Categories)
 			nodes               = newNamedNodeSelectors(config.Nodes)
 			categoryNormalizers = newNamedNormalizers(config.Normalizers.Categories)
@@ -62,6 +63,7 @@ var runCmd = &cobra.Command{
 			w:          os.Stdout,
 			logger:     logger,
 			isDebug:    isDebug,
+			ignores:    ignores,
 			categories: grdep.CachedFunc(categories.Select),
 			// Caching lines as keys is not very effective
 			nodes:              nodes.Select,

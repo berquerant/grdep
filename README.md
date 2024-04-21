@@ -16,8 +16,9 @@ Available Commands:
   skeleton    Generate config skeleton
 
 Flags:
-      --debug   Enable debug logs
-  -h, --help    help for grdep
+      --debug     Enable debug logs
+  -h, --help      help for grdep
+      --metrics   Show metrics
 
 Use "grdep [command] --help" for more information about a command.
 ```

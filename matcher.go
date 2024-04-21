@@ -11,6 +11,24 @@ import (
 	"time"
 )
 
+type NamedMatcherSet struct {
+	MatcherSet
+	name string
+}
+
+func NewNamedMatcherSet(name string, matcherSet MatcherSet) *NamedMatcherSet {
+	return &NamedMatcherSet{
+		name:       name,
+		MatcherSet: matcherSet,
+	}
+}
+
+func (m NamedMatcherSet) Match(src string) ([]string, error) {
+	ret, err := m.MatcherSet.Match(src)
+	AddMetric(fmt.Sprintf("named-matcher-set-%s", m.name), err)
+	return ret, err
+}
+
 type MatcherSet []*Matcher
 
 func (m MatcherSet) Close() error {
@@ -78,25 +96,33 @@ func (m *Matcher) Match(src string) ([]string, error) {
 	return r, nil
 }
 
-func (m *Matcher) internalMatch(src string) ([]string, error) {
+func (m *Matcher) internalMatch(src string) (ret []string, err error) {
 	switch {
 	case m.LuaEntryPoint != "":
-		return m.runLua(src)
+		ret, err = m.runLua(src)
+		AddMetric("matcher-lua", err)
 	case m.Shell != "":
-		return m.runShell(src)
+		ret, err = m.runShell(src)
+		AddMetric("matcher-shell", err)
 	case m.Glob != "":
-		return m.glob(src)
+		ret, err = m.glob(src)
+		AddMetric("matcher-glob", err)
 	case m.Not != nil:
-		return m.notMatch(src)
+		ret, err = m.notMatch(src)
+		AddMetric("matcher-not", err)
 	case m.Template != "":
-		return m.expand(src)
+		ret, err = m.expand(src)
+		AddMetric("matcher-template", err)
 	case m.Regex != nil:
-		return m.match(src)
+		ret, err = m.match(src)
+		AddMetric("matcher-regex", err)
 	case len(m.Value) > 0:
-		return m.value(src)
+		ret, err = m.value(src)
+		AddMetric("matcher-value", err)
 	default:
-		return nil, ErrUnmatched
+		err = ErrUnmatched
 	}
+	return
 }
 
 func (m *Matcher) Close() error {
