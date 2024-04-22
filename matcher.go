@@ -24,9 +24,9 @@ func NewNamedMatcherSet(name string, matcherSet MatcherSet) *NamedMatcherSet {
 }
 
 func (m NamedMatcherSet) Match(src string) ([]string, error) {
-	ret, err := m.MatcherSet.Match(src)
-	AddMetric(fmt.Sprintf("named-matcher-set-%s", m.name), err)
-	return ret, err
+	return AddMetric(fmt.Sprintf("named-matcher-set-%s", m.name), func() ([]string, error) {
+		return m.MatcherSet.Match(src)
+	})
 }
 
 type MatcherSet []*Matcher
@@ -96,33 +96,39 @@ func (m *Matcher) Match(src string) ([]string, error) {
 	return r, nil
 }
 
-func (m *Matcher) internalMatch(src string) (ret []string, err error) {
+func (m *Matcher) internalMatch(src string) ([]string, error) {
 	switch {
 	case m.LuaEntryPoint != "":
-		ret, err = m.runLua(src)
-		AddMetric("matcher-lua", err)
+		return AddMetric("matcher-lua", func() ([]string, error) {
+			return m.runLua(src)
+		})
 	case m.Shell != "":
-		ret, err = m.runShell(src)
-		AddMetric("matcher-shell", err)
+		return AddMetric("matcher-shell", func() ([]string, error) {
+			return m.runShell(src)
+		})
 	case m.Glob != "":
-		ret, err = m.glob(src)
-		AddMetric("matcher-glob", err)
+		return AddMetric("matcher-glob", func() ([]string, error) {
+			return m.glob(src)
+		})
 	case m.Not != nil:
-		ret, err = m.notMatch(src)
-		AddMetric("matcher-not", err)
+		return AddMetric("matcher-not", func() ([]string, error) {
+			return m.notMatch(src)
+		})
 	case m.Template != "":
-		ret, err = m.expand(src)
-		AddMetric("matcher-template", err)
+		return AddMetric("matcher-template", func() ([]string, error) {
+			return m.expand(src)
+		})
 	case m.Regex != nil:
-		ret, err = m.match(src)
-		AddMetric("matcher-regex", err)
+		return AddMetric("matcher-regex", func() ([]string, error) {
+			return m.match(src)
+		})
 	case len(m.Value) > 0:
-		ret, err = m.value(src)
-		AddMetric("matcher-value", err)
+		return AddMetric("matcher-value", func() ([]string, error) {
+			return m.value(src)
+		})
 	default:
-		err = ErrUnmatched
+		return nil, ErrUnmatched
 	}
-	return
 }
 
 func (m *Matcher) Close() error {

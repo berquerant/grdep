@@ -47,8 +47,8 @@ func Execute() error {
 }
 
 func showMetrics() {
-	grdep.GetMetrics().Walk(func(key string, value uint64) {
-		grdep.L().Info("metrics", "key", key, "value", value)
+	grdep.GetMetrics().Walk(func(key string, value *grdep.GaugeMapElement) {
+		grdep.L().Info("metrics", "key", key, "count", value.Count, "duration_ms", value.Duration.Milliseconds())
 	})
 }
 
