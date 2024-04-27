@@ -23,12 +23,22 @@ func getDebug(cmd *cobra.Command) bool {
 	return debug
 }
 
+func getMetrics(cmd *cobra.Command) bool {
+	enableMetrics, _ := cmd.Flags().GetBool("metrics")
+	return enableMetrics
+}
+
 var rootCmd = &cobra.Command{
 	Use:   "grdep",
 	Short: "Find dependencies by grep.",
+	PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
+		if getMetrics(cmd) {
+			grdep.InitMetrics()
+		}
+		return nil
+	},
 	PersistentPostRunE: func(cmd *cobra.Command, _ []string) error {
-		enableMetrics, _ := cmd.Flags().GetBool("metrics")
-		if enableMetrics {
+		if getMetrics(cmd) {
 			showMetrics()
 		}
 		return nil
@@ -47,6 +57,7 @@ func Execute() error {
 }
 
 func showMetrics() {
+	grdep.GetMetrics().Close()
 	grdep.GetMetrics().Walk(func(key string, value *grdep.GaugeMapElement) {
 		grdep.L().Info("metrics", "key", key, "count", value.Count, "duration_ms", value.Duration.Milliseconds())
 	})

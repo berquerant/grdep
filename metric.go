@@ -1,15 +1,44 @@
 package grdep
 
 import (
-	"fmt"
 	"strings"
 	"sync"
 	"time"
 )
 
+type GaugeMapIface interface {
+	Walk(f func(key string, value *GaugeMapElement))
+	Close()
+	Incr(key string, f func() (any, error)) (any, error)
+}
+
+var (
+	_ GaugeMapIface = &GaugeMap{}
+	_ GaugeMapIface = &NullGaugeMap{}
+)
+
+type NullGaugeMap struct{}
+
+func NewNullGaugeMap() *NullGaugeMap {
+	return &NullGaugeMap{}
+}
+
+func (*NullGaugeMap) Walk(_ func(key string, value *GaugeMapElement)) {}
+func (*NullGaugeMap) Close()                                          {}
+func (*NullGaugeMap) Incr(_ string, f func() (any, error)) (any, error) {
+	return f()
+}
+
 type GaugeMap struct {
-	d   map[string]*GaugeMapElement
-	mux sync.RWMutex
+	d     map[string]*GaugeMapElement
+	addC  chan *addGaugeMapRequest
+	doneC chan struct{}
+}
+
+type addGaugeMapRequest struct {
+	key      string
+	count    uint64
+	duration time.Duration
 }
 
 type GaugeMapElement struct {
@@ -18,11 +47,21 @@ type GaugeMapElement struct {
 }
 
 func (g *GaugeMap) Walk(f func(key string, value *GaugeMapElement)) {
-	g.mux.RLock()
-	defer g.mux.RUnlock()
 	for k, v := range g.d {
 		f(k, v)
 	}
+}
+
+func (g *GaugeMap) Close() {
+	close(g.addC)
+	<-g.doneC
+}
+
+func (g *GaugeMap) addWorker() {
+	for r := range g.addC {
+		g.add(r.key, r.count, r.duration)
+	}
+	close(g.doneC)
 }
 
 func (*GaugeMap) sanitizeKey(key string) string {
@@ -48,28 +87,43 @@ func (g *GaugeMap) Incr(key string, f func() (any, error)) (any, error) {
 	ret, err := f()
 	elapsed := time.Since(start)
 
-	g.mux.Lock()
-	defer g.mux.Unlock()
-
-	g.add(fmt.Sprintf("%s-call", key), 1, elapsed)
+	send := func(suffix string) {
+		g.addC <- &addGaugeMapRequest{
+			key:      key + "-" + suffix,
+			count:    1,
+			duration: elapsed,
+		}
+	}
+	send("call")
 	if err != nil {
-		g.add(fmt.Sprintf("%s-error", key), 1, elapsed)
+		send("error")
 	} else {
-		g.add(fmt.Sprintf("%s-success", key), 1, elapsed)
+		send("success")
 	}
 
 	return ret, err
 }
 
-func NewGaugeMap() *GaugeMap {
-	return &GaugeMap{
-		d: map[string]*GaugeMapElement{},
+func newGaugeMap() *GaugeMap {
+	g := &GaugeMap{
+		d:     map[string]*GaugeMapElement{},
+		addC:  make(chan *addGaugeMapRequest, 1000),
+		doneC: make(chan struct{}),
 	}
+	go g.addWorker()
+	return g
 }
 
 var (
-	metricGaugeMap = NewGaugeMap()
+	metricGaugeMap GaugeMapIface = NewNullGaugeMap()
+	initMetrics                  = sync.OnceFunc(func() {
+		metricGaugeMap = newGaugeMap()
+	})
 )
+
+func InitMetrics() {
+	initMetrics()
+}
 
 func AddMetric[T any](key string, f func() (T, error)) (T, error) {
 	v, err := metricGaugeMap.Incr(key, func() (any, error) {
@@ -79,6 +133,6 @@ func AddMetric[T any](key string, f func() (T, error)) (T, error) {
 	return v.(T), err
 }
 
-func GetMetrics() *GaugeMap {
+func GetMetrics() GaugeMapIface {
 	return metricGaugeMap
 }
