@@ -1,5 +1,5 @@
-github.com/berquerant/cache v0.2.0 h1:hEjriDUWuAWGJN4x6lTlK+krfVWj9ORZPkEmlUuHzec=
-github.com/berquerant/cache v0.2.0/go.mod h1:HNl7u7elq9Mqwzk5SBNARyqWgjDzle6SeZNvqcPoEhk=
+github.com/berquerant/cache v0.3.1 h1:udi1YAzO3BwIFa7qXmEqbnrFw/0K80T79iDi99qdLBw=
+github.com/berquerant/cache v0.3.1/go.mod h1:GVljYbD/klSnvmhtADhFU5qDbu7XWISccS7VqQ+jGss=
 github.com/berquerant/execx v0.6.1 h1:7JIz0+5xoH+rrIS2gUUBnHhEQO0D/GsyUI+fV6KAFmo=
 github.com/berquerant/execx v0.6.1/go.mod h1:svWBwuRYDyD2atFzNhXL7cqEqb1TzGAB7i/Y1IgJeJI=
 github.com/cpuguy83/go-md2man/v2 v2.0.4/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
