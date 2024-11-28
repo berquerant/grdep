@@ -6,7 +6,7 @@ require (
 	github.com/berquerant/cache v0.3.1
 	github.com/berquerant/execx v0.6.1
 	github.com/spf13/cobra v1.8.1
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/yuin/gopher-lua v1.1.1
 	golang.org/x/sync v0.9.0
 	golang.org/x/vuln v1.1.3
