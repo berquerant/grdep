@@ -4,7 +4,7 @@ go 1.23.2
 
 require (
 	github.com/berquerant/cache v0.3.1
-	github.com/berquerant/execx v0.6.1
+	github.com/berquerant/execx v0.6.2
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.10.0
 	github.com/yuin/gopher-lua v1.1.1
@@ -14,6 +14,7 @@ require (
 )
 
 require (
+	github.com/berquerant/goconfig v0.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
