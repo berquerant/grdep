@@ -1,10 +1,11 @@
 module github.com/berquerant/grdep
 
 go 1.23.2
+toolchain go1.23.4
 
 require (
 	github.com/berquerant/cache v0.3.1
-	github.com/berquerant/execx v0.6.2
+	github.com/berquerant/execx v0.7.0
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.10.0
 	github.com/yuin/gopher-lua v1.1.1
