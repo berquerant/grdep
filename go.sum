@@ -1,7 +1,7 @@
 github.com/berquerant/cache v0.3.1 h1:udi1YAzO3BwIFa7qXmEqbnrFw/0K80T79iDi99qdLBw=
 github.com/berquerant/cache v0.3.1/go.mod h1:GVljYbD/klSnvmhtADhFU5qDbu7XWISccS7VqQ+jGss=
-github.com/berquerant/execx v0.6.2 h1:ZcKLSThjWycVTJDLt8YenM7yv8rv7CLsg9T6cz0upgw=
-github.com/berquerant/execx v0.6.2/go.mod h1:/OoEEuwzm3+QnRLw973+LMWbAWEe+6xxXrvDoytS0CQ=
+github.com/berquerant/execx v0.7.0 h1:V4YnC75PcgnJc3ZSmyzSGfz9hjDIdafjnIpv7HzELao=
+github.com/berquerant/execx v0.7.0/go.mod h1:bemUZeJh8eEAbztIAyShXv/4w4rX43M/7QSXidtBohA=
 github.com/berquerant/goconfig v0.3.0 h1:ZE06HPp8aoXcdaNBWr3YsnMokfl5BBV4J0OHha5E8E0=
 github.com/berquerant/goconfig v0.3.0/go.mod h1:4fY4lQ98iRSU8Rn4huI7334mlVS46rAHjrAVfonzGzs=
 github.com/cpuguy83/go-md2man/v2 v2.0.4/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
