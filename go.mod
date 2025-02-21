@@ -9,7 +9,6 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/yuin/gopher-lua v1.1.1
 	golang.org/x/sync v0.11.0
-	golang.org/x/vuln v1.1.4
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -23,4 +22,7 @@ require (
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/telemetry v0.0.0-20240522233618-39ace7a40ae7 // indirect
 	golang.org/x/tools v0.29.0 // indirect
+	golang.org/x/vuln v1.1.4 // indirect
 )
+
+tool golang.org/x/vuln/cmd/govulncheck
