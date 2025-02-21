@@ -1,9 +1,7 @@
 github.com/berquerant/cache v0.3.1 h1:udi1YAzO3BwIFa7qXmEqbnrFw/0K80T79iDi99qdLBw=
 github.com/berquerant/cache v0.3.1/go.mod h1:GVljYbD/klSnvmhtADhFU5qDbu7XWISccS7VqQ+jGss=
-github.com/berquerant/execx v0.8.0 h1:w2uQyBs2JQCVpm7RmFrR6t3Yi9rBWHR/DWQDQUfBk5U=
-github.com/berquerant/execx v0.8.0/go.mod h1:bemUZeJh8eEAbztIAyShXv/4w4rX43M/7QSXidtBohA=
-github.com/berquerant/goconfig v0.3.0 h1:ZE06HPp8aoXcdaNBWr3YsnMokfl5BBV4J0OHha5E8E0=
-github.com/berquerant/goconfig v0.3.0/go.mod h1:4fY4lQ98iRSU8Rn4huI7334mlVS46rAHjrAVfonzGzs=
+github.com/berquerant/execx v0.9.0 h1:gM/ln2Lfzowdb0t+svsgA2Kh2pQFM/IffuC+Tw8QUZc=
+github.com/berquerant/execx v0.9.0/go.mod h1:tmku8W8ORS7B81ODqB7Meu4LXlukg5bpMJWURg5RlLs=
 github.com/cpuguy83/go-md2man/v2 v2.0.6/go.mod h1:oOW0eioCTA6cOiMLiUPZOpcVxMig6NIQQ7OS05n1F4g=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
