@@ -28,11 +28,9 @@ jobs:
       - name: Download go modules
         if: ${{ steps.setup-go.outputs.cache-hit != 'true' }}
         run: go mod download
-      - name: Build
-        run: make
+      - name: Lint
+        run: make lint
       - name: Test
         run: make test
-      - name: Lint
-        run: make vet
-      - name: Vuln
-        run: make vuln
+      - name: Build
+        run: make
