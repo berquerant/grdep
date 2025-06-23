@@ -1,14 +1,14 @@
 module github.com/berquerant/grdep
 
-go 1.24.2
+go 1.24.4
 
 require (
 	github.com/berquerant/cache v0.3.1
-	github.com/berquerant/execx v0.11.0
+	github.com/berquerant/execx v0.11.1
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
 	github.com/yuin/gopher-lua v1.1.1
-	golang.org/x/sync v0.13.0
+	golang.org/x/sync v0.15.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
