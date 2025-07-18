@@ -3,7 +3,7 @@ module github.com/berquerant/grdep
 go 1.24.4
 
 require (
-	github.com/berquerant/cache v0.3.1
+	github.com/berquerant/cache v0.4.0
 	github.com/berquerant/execx v0.11.1
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
