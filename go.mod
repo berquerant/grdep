@@ -4,7 +4,7 @@ go 1.24.4
 
 require (
 	github.com/berquerant/cache v0.4.0
-	github.com/berquerant/execx v0.11.1
+	github.com/berquerant/execx v0.12.0
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
 	github.com/yuin/gopher-lua v1.1.1
