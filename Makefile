@@ -4,7 +4,7 @@ GOTEST = go test -v -cover -race
 
 ROOT = $(shell git rev-parse --show-toplevel)
 BIN = dist/grdep
-CMD = "./cmd/"
+CMD = "./cmd/grdep"
 
 .PHONY: $(BIN)
 $(BIN):
@@ -31,4 +31,4 @@ vet:
 
 .PHONY: golden
 golden:
-	./cmd/test/update-golden.sh
+	./cmd/grdep/test/update-golden.sh
