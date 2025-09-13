@@ -1,6 +1,6 @@
 module github.com/berquerant/grdep
 
-go 1.24.4
+go 1.25.1
 
 require (
 	github.com/berquerant/cache v0.4.0
