@@ -4,11 +4,11 @@ go 1.25.1
 
 require (
 	github.com/berquerant/cache v0.4.0
-	github.com/berquerant/execx v0.12.0
+	github.com/berquerant/execx v0.13.0
 	github.com/spf13/cobra v1.10.1
 	github.com/stretchr/testify v1.11.1
 	github.com/yuin/gopher-lua v1.1.1
-	golang.org/x/sync v0.17.0
+	golang.org/x/sync v0.18.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
